@@ -51,6 +51,10 @@ int main(int argc, char**argv){
 
     vector<KeyPoint> kps;
     fast_detect(images[0],kps,9,16);
+    Mat temp = images[0].clone();
+    drawKeypoints(temp,kps,temp);
+    imshow("fastt",temp);
+    waitKey(0);
     // for(auto i:kps){
     //     if(i.response > 2000)
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
@@ -176,29 +180,31 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
                 // cout << fast_score(sub_m,pts) << endl;
                 // fast_sc.at<unsigned short>(i+edge, j+edge) = fast_score(sub_m,pts);
                 fast_sc.at<unsigned short>(j+edge, i+edge) = fast_score(sub_m,pts);
-                KeyPoint kp(i+edge, j+edge, edge+0.5);
-                kp.response = fast_score(sub_m,pts);
-                kps.push_back(kp);
+                
             }
         }
     }
     
     reduce_point(fast_sc,5);
     Mat fast_mat(temp.rows,temp.cols,CV_8U,Scalar(0));
+    kps.clear();
 
     for(int i = 0;i<fast_sc.cols;i++){
         for(int j = 0 ; j<fast_sc.rows ; j++){
             if(fast_sc.at<unsigned short>(j,i) > 0){
-                cout << i << "," << j << " " << fast_sc.at<unsigned short>(j,i) << endl;
-                fast_mat.at<uchar>(j,i) = 255;
+                // cout << i << "," << j << " " << fast_sc.at<unsigned short>(j,i) << endl;
+                // fast_mat.at<uchar>(j,i) = 255;
+                KeyPoint kp(i, j, edge+0.5);
+                kp.response = fast_sc.at<unsigned short>(j,i);
+                kps.push_back(kp);
             }
         }
     }
     
 
-    imshow("origin",temp);
-    imshow("fast",fast_mat);
-    waitKey(0);
+    // imshow("origin",temp);
+    // imshow("fast",fast_mat);
+    // waitKey(0);
 
 }
 
