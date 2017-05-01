@@ -28,7 +28,7 @@ int get_img_in_dir(string dir, vector<Mat> &images);
 void create_octaves(const Mat&);
 void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2);
 int fast_score(const Mat &src, const vector<Point> &pts);
-void reduce_point(Mat& src);
+void reduce_point(Mat& src, int rad);
 
 
 int main(int argc, char**argv){
@@ -57,19 +57,6 @@ int main(int argc, char**argv){
     // }
     
 
-
-    // /* Result image */
-    // Mat HDR = Mat(Size(img_cols,img_rows),CV_32FC3);
-
-    // /* Three Threads for BGR */
-    // // thread blue(get_color_E, 0, n, l, pts, times, images, ref(HDR));
-    // thread blue(get_color_E, 0, n, cref(l), cref(pts), cref(times), cref(images), ref(HDR));
-    // thread green(get_color_E, 1, n, cref(l), cref(pts), cref(times), cref(images), ref(HDR));
-    // thread red(get_color_E, 2, n, cref(l), cref(pts), cref(times), cref(images), ref(HDR));
-
-    // blue.join();
-    // green.join();
-    // red.join();
 
     return 0;
 }
@@ -137,15 +124,9 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
     // imshow("ccc",sub_m);
     // cout << edge << endl;
 
-    cout << src.cols << " " << src.rows << endl;
-    fast_sc.at<unsigned short>(193,257) = 255;
-    for(int i = 0;i<temp.cols-2*edge;i++){
-        for(int j = 0 ; j<temp.rows-2*edge ; j++){
-            if(fast_sc.at<unsigned short>(i,j) > 0){
-                cout << i << "," << j << endl;
-            }
-        }
-    }
+    // cout << src.cols << " " << src.rows << endl;
+    // fast_sc.at<unsigned short>(193,257) = 255;
+    
     // waitKey(0);
     for(int i = 0;i<temp.cols-2*edge;i++){
         for(int j = 0 ; j<temp.rows-2*edge ; j++){
@@ -193,18 +174,31 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
             if(count >= 9){
                 // cout << "(" << i+edge << "," << j+edge << ")" << " ";
                 // cout << fast_score(sub_m,pts) << endl;
-                // fast_sc.at<uchar>(j+edge,i+edge) = 255;
+                // fast_sc.at<unsigned short>(i+edge, j+edge) = fast_score(sub_m,pts);
+                fast_sc.at<unsigned short>(j+edge, i+edge) = fast_score(sub_m,pts);
                 KeyPoint kp(i+edge, j+edge, edge+0.5);
                 kp.response = fast_score(sub_m,pts);
                 kps.push_back(kp);
             }
         }
     }
-    imshow("origin",temp);
-    imshow("fast",fast_sc);
-    waitKey(0);
-    // reduce_point(fast_sc);
+    
+    reduce_point(fast_sc,5);
+    Mat fast_mat(temp.rows,temp.cols,CV_8U,Scalar(0));
 
+    for(int i = 0;i<fast_sc.cols;i++){
+        for(int j = 0 ; j<fast_sc.rows ; j++){
+            if(fast_sc.at<unsigned short>(j,i) > 0){
+                cout << i << "," << j << " " << fast_sc.at<unsigned short>(j,i) << endl;
+                fast_mat.at<uchar>(j,i) = 255;
+            }
+        }
+    }
+    
+
+    imshow("origin",temp);
+    imshow("fast",fast_mat);
+    waitKey(0);
 
 }
 
@@ -218,9 +212,50 @@ int fast_score(const Mat &src, const vector<Point> &pts){
     return sc;
 }
 
-void reduce_point(Mat& src){
-    imshow("re",src);
-    waitKey(0);
+void reduce_point(Mat& src, int rad){
+    
+    vector<Point> temp_pts;
+    for(int k=0;k<rad;k++){
+        for(int l=0;l<rad;l++){
+            temp_pts.push_back(Point(k,l));
+        }
+    }
+    
+
+    for(int i=0;i<=src.cols-rad;i++){
+        for(int j=0;j<=src.rows-rad;j++){
+
+            int max = 0;
+            for(int k=0;k<rad;k++){
+                for(int l=0;l<rad;l++){
+                    if(src.at<unsigned short>(j+l,i+k) > max){
+                        max = src.at<unsigned short>(j+l,i+k);
+                    }
+                }
+            }
+            if(max > 0){
+                for(int k=0;k<rad;k++){
+                    for(int l=0;l<rad;l++){
+                        if(src.at<unsigned short>(j+l,i+k) < max){
+                            src.at<unsigned short>(j+l,i+k) = 0;
+                        }
+                    }
+                } 
+            }
+            // int a;
+            // cin >> a;
+           
+            //         if(sub_m.at<uchar>(k,l)>center){
+            //             src.at<unsigned short>(i+(rad-1)/2,j+(rad-1)/2) = 0;
+            //             // break;
+            //         }
+            //     }
+            // }
+        }
+    }
+    // src.at<unsigned short>(380,231) = 0;
+    // imshow("re",src);
+    // waitKey(0);
 }
 
 void create_octaves(const Mat &src){
