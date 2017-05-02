@@ -6,10 +6,13 @@
 #include "opencv2/features2d.hpp"
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
-#include "iostream"
-#include "string"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
 
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp);
+
+void brisk_short(const cv::Mat& src,cv::KeyPoint kp, int rad);
 
 
 #endif
