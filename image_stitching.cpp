@@ -4,6 +4,7 @@
 #include <opencv2/highgui.hpp>
 #include "opencv2/features2d.hpp"
 #include "opencv2/core/matx.hpp"
+#include "brisk_descriptor.h"
 #include <dirent.h>
 
 #include <algorithm>
@@ -53,8 +54,9 @@ int main(int argc, char**argv){
     fast_detect(images[0],kps,9,16);
     Mat temp = images[0].clone();
     drawKeypoints(temp,kps,temp);
-    imshow("fastt",temp);
-    waitKey(0);
+    // imshow("fastt",temp);
+    // waitKey(0);
+    brisk_short(images[0],kps[0]);
     // for(auto i:kps){
     //     if(i.response > 2000)
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
