@@ -6,12 +6,20 @@ using namespace cv;
 void brisk_short(const cv::Mat& src,cv::KeyPoint kp,int rad){
     Rect rect(300, 300, 81, 81);
     Mat temp = src(rect);
+
+    Mat temp2;
+    GaussianBlur(temp,temp2, Size(0,0),5,0);
+    // imshow("src",src);
+    // imshow("temp", temp);
+    // imshow("temp2", temp2);
+    // waitKey(0);
+
     cout << temp.rows/2-0.5 << endl;
     Point2f center(temp.rows/2.0-0.5,temp.cols/2.0-0.5);
     // drawKeypoints(src,kp,temp);
     vector<Point> pts;
     vector<double> r;
-    vector<int> r_num{10,14,15,20};
+    vector<int> r_num{10,14,15,20}; 
 
     r.push_back(double(rad)*4/15);
     r.push_back(double(rad)*7/15);
