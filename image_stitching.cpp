@@ -5,6 +5,7 @@
 #include "opencv2/features2d.hpp"
 #include "opencv2/core/matx.hpp"
 #include "brisk_descriptor.h"
+#include "cylindrical.h"
 #include <dirent.h>
 
 #include <algorithm>
