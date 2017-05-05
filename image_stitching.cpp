@@ -54,8 +54,9 @@ int main(int argc, char**argv){
     vector<KeyPoint> kps;
     fast_detect(images[0],kps,9,16);
     Mat temp = images[0].clone();
-    drawKeypoints(temp,kps,temp);
-    // imshow("fastt",temp);
+    // Mat temp2;
+    // drawKeypoints(temp,kps,temp2);
+    // imshow("fastt",temp2);
     // waitKey(0);
     // brisk_short(images[0],kps[0],35);
     // for(auto i:kps){

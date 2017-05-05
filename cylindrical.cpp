@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-void cylindrical(Mat& src, vector<cv::KeyPoint> kps, double f){
+void cylindrical(Mat& src, vector<cv::KeyPoint> &kps, double f){
     Mat result_mat(src.rows,src.cols,CV_8UC3);
     Point2f center((src.cols-1)/2.0,(src.rows-1)/2.0);
     for(int i = 0;i<src.cols;i++){
@@ -17,6 +17,14 @@ void cylindrical(Mat& src, vector<cv::KeyPoint> kps, double f){
             // cin >> x;
         }
     }
+
+    for(auto &i:kps){
+        i.pt.x = center.x + f*atan((i.pt.x-center.x)/f);
+        i.pt.y = center.y + f*(i.pt.y-center.y)/sqrt((i.pt.x-center.x)*(i.pt.x-center.x)+f*f);
+    }
+
     imshow("ee1",result_mat);
+    drawKeypoints(result_mat,kps,result_mat);
+    imshow("Kp",result_mat);
     waitKey(0);
 }

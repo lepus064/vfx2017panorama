@@ -12,7 +12,7 @@
 #include <cmath>
 
 
-void cylindrical(cv::Mat& src, std::vector<cv::KeyPoint> kps, double f);
+void cylindrical(cv::Mat& src, std::vector<cv::KeyPoint> &kps, double f);
 
 
 #endif

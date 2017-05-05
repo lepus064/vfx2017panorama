@@ -1,5 +1,5 @@
 cd build
 cmake ..
-make
+make -j2
 ./image_stitching ../data
 cd ..
