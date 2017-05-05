@@ -66,7 +66,9 @@ int main(int argc, char**argv){
     // }
     cylindrical(temp, kps,704.916);
     cylindrical(temp2,kps,706.286);
-    imshow("cylindrical", cylindrical_merge(temp2,temp,200,10,0));
+    imshow("right",temp);
+    imshow("left",temp2);
+    imshow("cylindrical", cylindrical_merge(temp2,temp,244,5,0));
     waitKey(0);
 
     return 0;
