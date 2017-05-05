@@ -54,6 +54,7 @@ int main(int argc, char**argv){
     vector<KeyPoint> kps;
     fast_detect(images[0],kps,9,16);
     Mat temp = images[0].clone();
+    Mat temp2(images[1].clone());
     // Mat temp2;
     // drawKeypoints(temp,kps,temp2);
     // imshow("fastt",temp2);
@@ -64,8 +65,9 @@ int main(int argc, char**argv){
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
     // }
     cylindrical(temp, kps,704.916);
-    
-
+    cylindrical(temp2,kps,706.286);
+    imshow("cylindrical", cylindrical_merge(temp2,temp,200,10,0));
+    waitKey(0);
 
     return 0;
 }
