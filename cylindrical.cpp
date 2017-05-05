@@ -35,15 +35,33 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
     double overlap_x = (left.cols+right.cols)/2.0 - x2x;
     
     Mat res(rows,cols,CV_8UC3,Scalar(0,0,0));
+    Mat temp_l(rows,1,CV_8UC3,Scalar(0,0,0));
+    Mat temp_r(rows,1,CV_8UC3,Scalar(0,0,0));
     if(y2y < 0){
-
+        // TODO
+        left(Rect(0,0,left.cols - overlap_x,left.rows)).copyTo(res(Rect(0,-y2y,left.cols - overlap_x, right.rows)));
+        right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,0,right.cols - overlap_x,right.rows)));
+        int count = overlap_x;
+        int edge = 5;
+        double alpha,beta;
+        for(int i = left.cols - overlap_x ;i < left.cols; i++){
+            left(Rect(i,0,1,left.rows)).copyTo(temp_l(Rect(0,0,1,left.rows)));
+            right(Rect(overlap_x - count,0,1,right.rows)).copyTo(temp_r(Rect(0,y2y,1,right.rows)));
+            if(count > overlap_x - edge)
+                alpha = 1.0;
+            else if(count <= edge)
+                alpha = 0.0;
+            else 
+                alpha = (count-2*edge)/(overlap_x-2*edge);
+            double beta = ( 1.0 - alpha );
+            addWeighted( temp_l, alpha, temp_r, beta, 0.0, res(Rect(i,0,1,rows)));
+            count--;
+        }
     }
     else{
         left(Rect(0,0,left.cols - overlap_x,left.rows)).copyTo(res(Rect(0,0,left.cols - overlap_x, right.rows)));
         right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,y2y,right.cols - overlap_x,right.rows)));
         int count = overlap_x;
-        Mat temp_l(rows,1,CV_8UC3,Scalar(0,0,0));
-        Mat temp_r(rows,1,CV_8UC3,Scalar(0,0,0));
         int edge = 5;
         double alpha,beta;
         for(int i = left.cols - overlap_x ;i < left.cols; i++){
