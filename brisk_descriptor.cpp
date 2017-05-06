@@ -55,14 +55,11 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
 
 
     RNG rng(12345);
-    // for(const auto &i:ptp){
-    //     if(i.dist < 9.75*rad/15){
-    //         line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
-    //     }
-    // }
-
     for(const auto &i:ptp){
-        if(i.dist > 13.67*rad/15){
+        if(i.dist < 9.75*rad/15){
+            line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
+        }
+        else if(i.dist > 13.67*rad/15){
             line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
         }
     }
