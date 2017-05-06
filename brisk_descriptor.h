@@ -11,8 +11,7 @@
 #include <vector>
 #include <cmath>
 
-
+double get_gs_value(const cv::Mat& src, cv::Point pt);
 void brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
-
 
 #endif

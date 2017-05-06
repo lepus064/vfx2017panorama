@@ -14,10 +14,10 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     Mat temp = src(rect);
 
     Mat temp2;
-    GaussianBlur(temp,temp2, Size(0,0),5,0);
+    GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
     // imshow("src",src);
     // imshow("temp", temp);
-    // imshow("temp2", temp2);
+    imshow("temp2", temp2);
     // waitKey(0);
 
     cout << temp.rows/2-0.5 << endl;
@@ -59,9 +59,9 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
         if(i.dist < 9.75*rad/15){
             line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
         }
-        else if(i.dist > 13.67*rad/15){
-            line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
-        }
+        // else if(i.dist > 13.67*rad/15){
+        //     line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
+        // }
     }
 
     // for(const auto& pt:pts){
