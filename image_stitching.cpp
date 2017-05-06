@@ -75,7 +75,7 @@ int main(int argc, char**argv){
     // drawKeypoints(temp,kps,temp2);
     // imshow("fastt",temp2);
     // waitKey(0);
-    // brisk_short(images[0],kps[0],35);
+    brisk_short(images[0],kps[0],100);
     // for(auto i:kps){
     //     if(i.response > 2000)
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;

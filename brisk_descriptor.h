@@ -12,7 +12,7 @@
 #include <cmath>
 
 
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp, int rad);
+void brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
 
 
 #endif

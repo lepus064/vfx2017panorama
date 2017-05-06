@@ -3,8 +3,14 @@
 using namespace std;
 using namespace cv;
 
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp,int rad){
-    Rect rect(300, 300, 81, 81);
+struct pt_pair{
+    Point start;
+    Point end;
+    double dist;
+};
+
+void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
+    Rect rect(0, 0, 350, 350);
     Mat temp = src(rect);
 
     Mat temp2;
@@ -32,12 +38,40 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,int rad){
             pts.push_back(Point2f(x,y));
         }
     }
-    for(const auto& pt:pts){
-        circle(temp,pt,3,Scalar(255,255,255));
+    
+    vector<pt_pair> ptp;
+
+    for(int i=0; i<pts.size()-1;i++){
+        for(int j=i+1; j < pts.size() ;j++){
+            pt_pair temp_pr;
+            temp_pr.start = pts[i];
+            temp_pr.end = pts[j];
+            double x_x = abs(pts[i].x - pts[j].x);
+            double y_y = abs(pts[i].y - pts[j].y);
+            temp_pr.dist = sqrt(x_x*x_x + y_y*y_y);
+            ptp.push_back(temp_pr);
+        }
     }
 
+
+    RNG rng(12345);
+    for(const auto &i:ptp){
+        if(i.dist < 9.75*rad/15){
+            line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
+        }
+        else if(i.dist > 13.67*rad/15){
+            line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
+        }
+    }
+
+    // for(const auto& pt:pts){
+    //     circle(temp,pt,3,Scalar(255,255,255));
+    // }
+
     cout << M_PI << endl;
-    circle(temp,center,3,Scalar(255,255,255));
+    // circle(temp,center,3,Scalar(255,255,255));
+    
+    // resize(temp,temp,Size(),5,5);
     imshow("brisk",temp);
     waitKey(0);
 }
