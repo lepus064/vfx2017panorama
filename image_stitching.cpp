@@ -51,10 +51,26 @@ int main(int argc, char**argv){
     // create_octaves(images[0]);
 
 
-    vector<KeyPoint> kps;
-    fast_detect(images[0],kps,9,16);
-    Mat temp = images[0].clone();
-    Mat temp2(images[1].clone());
+    vector<vector<KeyPoint> > kps(images.size());
+    for(int i=0;i<images.size();i++){
+        FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
+    }
+    // Ptr<Feature2D> b = BRISK::create();
+    // b->
+    Mat temp_1, temp_2;
+    drawKeypoints(images[0],kps[0],temp_1);
+    drawKeypoints(images[1],kps[1],temp_2);
+    imshow("kps1",temp_1);
+    imshow("kps2",temp_2);
+    waitKey(0);
+
+
+
+    // fast_detect(images[0],kps[0],9,16);
+    // Mat temp = images[0].clone();
+    // Mat temp2(images[1].clone());
+
+
     // Mat temp2;
     // drawKeypoints(temp,kps,temp2);
     // imshow("fastt",temp2);
@@ -64,12 +80,13 @@ int main(int argc, char**argv){
     //     if(i.response > 2000)
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
     // }
-    cylindrical(temp, kps,704.916);
-    cylindrical(temp2,kps,706.286);
-    imshow("right",temp);
-    imshow("left",temp2);
-    imshow("cylindrical", cylindrical_merge(temp2,temp,244,5,0));
-    waitKey(0);
+
+    // cylindrical(temp, kps,704.916);
+    // cylindrical(temp2,kps,706.286);
+    // imshow("right",temp);
+    // imshow("left",temp2);
+    // imshow("cylindrical", cylindrical_merge(temp2,temp,244,5,0));
+    // waitKey(0);
 
     return 0;
 }
