@@ -19,6 +19,7 @@
 #include <random>
 #include <stdio.h>
 #include <vector>
+#include <deque>
 #include <thread>
 
 using namespace cv;
@@ -27,7 +28,7 @@ using namespace std;
 void loadExposureSeq(string, vector<Mat>&, vector<double>&);
 double weight(int z);
 int get_img_in_dir(string dir, vector<Mat> &images);
-void create_octaves(const Mat&);
+void create_octaves(const Mat &src,vector<Mat>& c_octaves, vector<Mat>& d_octaves);
 void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2);
 int fast_score(const Mat &src, const vector<Point> &pts);
 void reduce_point(Mat& src, int rad);
@@ -51,31 +52,46 @@ int main(int argc, char**argv){
     // create_octaves(images[0]);
 
 
-    vector<vector<KeyPoint> > kps(images.size());
-    for(int i=0;i<images.size();i++){
-        FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
+    vector<vector<vector<KeyPoint> > > kps(images.size());
+    //kps[images][octaves][keypoints]
+    // kps[0].resize(9);
+    // for(int i=0;i<images.size();i++){
+    //     FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
+    // }
+
+    // fast_detect(images[0],kps[0][0],9,16);
+
+    //create octaves
+    Mat temp = images[0].clone();
+    vector<Mat> c_temp; //  0 ~ 3
+    vector<Mat> d_temp; // -1 ~ 3
+    create_octaves(temp,c_temp,d_temp);
+
+    //keypoint from octaves
+    deque<vector<KeyPoint> > kps1;
+    for(int i = 0;i<4;i++){
+        vector<KeyPoint> temp_kps1;
+        vector<KeyPoint> temp_kps2;
+        fast_detect(c_temp[i],temp_kps1,9,16);
+        fast_detect(d_temp[i+1],temp_kps2,9,16);
+        drawKeypoints(c_temp[i],temp_kps1,c_temp[i]);
+        drawKeypoints(d_temp[i+1],temp_kps2,d_temp[i+1]);
+        imshow("c",c_temp[i]);
+        imshow("d",d_temp[i+1]);
+        kps1.push_back(temp_kps1);
+        kps1.push_back(temp_kps2);
+        waitKey(0);
     }
-    // Ptr<Feature2D> b = BRISK::create();
-    // b->
-    // Mat temp_1, temp_2;
-    // drawKeypoints(images[0],kps[0],temp_1);
-    // drawKeypoints(images[1],kps[1],temp_2);
-    // imshow("kps1",temp_1);
-    // imshow("kps2",temp_2);
-    // waitKey(0);
 
 
-
-    // fast_detect(images[0],kps[0],9,16);
-    // Mat temp = images[0].clone();
-    // Mat temp2(images[1].clone());
 
 
     // Mat temp2;
-    // drawKeypoints(temp,kps,temp2);
+    // drawKeypoints(temp,kps[0][0],temp2);
     // imshow("fastt",temp2);
     // waitKey(0);
-    brisk_short(images[0],kps[0][0],100);
+
+    // brisk_short(images[0],kps[0][0],100);
     // brisk_compare();
     // for(auto i:kps){
     //     if(i.response > 2000)
@@ -223,7 +239,7 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
         for(int j = 0 ; j<fast_sc.rows ; j++){
             if(fast_sc.at<unsigned short>(j,i) > 0){
                 // cout << i << "," << j << " " << fast_sc.at<unsigned short>(j,i) << endl;
-                // fast_mat.at<uchar>(j,i) = 255;
+                fast_mat.at<uchar>(j,i) = 255;
                 KeyPoint kp(i, j, edge+0.5);
                 kp.response = fast_sc.at<unsigned short>(j,i);
                 kps.push_back(kp);
@@ -294,9 +310,9 @@ void reduce_point(Mat& src, int rad){
     // waitKey(0);
 }
 
-void create_octaves(const Mat &src){
+void create_octaves(const Mat &src,vector<Mat>& c_octaves, vector<Mat>& d_octaves){
     vector<Mat> c(4);
-    vector<Mat> d(4);
+    deque<Mat> d(4);
     vector<KeyPoint> kp;
     c[0] = src;
     // resize(src,c[0],Size(),0.5,0.5);
@@ -306,15 +322,14 @@ void create_octaves(const Mat &src){
         resize(c[i],c[i+1],Size(),0.5,0.5);
         resize(d[i],d[i+1],Size(),0.5,0.5);
     }
-    // for(auto i:c){
-    //     imshow("c",i);
-    //     waitKey(0);
-    // }
-
-    FAST(c[0],kp,30,true,FastFeatureDetector::TYPE_9_16);
-    drawKeypoints(c[0],kp,c[0]);
+    Mat d0(src);
+    d.push_front(d0);
+    c_octaves.assign(c.begin(),c.end());
+    d_octaves.assign(d.begin(),d.end());
+    // FAST(c[0],kp,30,true,FastFeatureDetector::TYPE_9_16);
+    // drawKeypoints(c[0],kp,c[0]);
     
     // imshow("origin",src);
-    imshow("test",c[0]);
-    waitKey(0);
+    // imshow("test",c[0]);
+    // waitKey(0);
 }

@@ -64,7 +64,7 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     int short_num = 0;
     int long_num = 0;
     for(const auto &i:ptp){
-        if(i.dist < 9.75*rad/15.35){
+        if(i.dist < 9.75*rad/15.34){
             short_num++;
             line(sh,i.start,i.end,Scalar(rng.uniform(100,150),rng.uniform(100,150),rng.uniform(100,150)));
         }
@@ -73,7 +73,7 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
             line(lo,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
         }
         else{
-            line(un,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
+            // line(un,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
         }
     }
     cout << "pair:  " << ptp.size() << endl;
