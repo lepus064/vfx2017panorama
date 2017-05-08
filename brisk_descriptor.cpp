@@ -12,12 +12,15 @@ struct pt_pair{
 void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     Rect rect(0, 0, 350, 350);
     Mat temp = src(rect);
-
+    Mat sh,lo,un;
+    sh = temp.clone();
+    lo = temp.clone();
+    un = temp.clone();
     Mat temp2;
-    GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
+    // GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
     // imshow("src",src);
     // imshow("temp", temp);
-    imshow("temp2", temp2);
+    // imshow("temp2", temp2);
     // waitKey(0);
 
     cout << temp.rows/2-0.5 << endl;
@@ -27,11 +30,14 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     vector<double> r;
     vector<int> r_num{10,14,15,20}; 
 
-    r.push_back(double(rad)*4/15);
-    r.push_back(double(rad)*7/15);
-    r.push_back(double(rad)*10.5/15);
+    r.push_back(double(rad)*2.9/10.8);
+    r.push_back(double(rad)*4.9/10.8);
+    r.push_back(double(rad)*7.4/10.8);
     r.push_back(double(rad));
-    for(int i=0;i<4;i++){
+
+    pts.push_back(center);
+
+    for(int i=0;i<r.size();i++){
         for(int j=0;j<r_num[i];j++){
             double x = center.x + r[i]*cos(2*M_PI*j/r_num[i]);
             double y = center.y + r[i]*sin(2*M_PI*j/r_num[i]);
@@ -55,14 +61,25 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
 
 
     RNG rng(12345);
+    int short_num = 0;
+    int long_num = 0;
     for(const auto &i:ptp){
-        if(i.dist < 9.75*rad/15){
-            line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
+        if(i.dist < 9.75*rad/15.35){
+            short_num++;
+            line(sh,i.start,i.end,Scalar(rng.uniform(100,150),rng.uniform(100,150),rng.uniform(100,150)));
         }
-        // else if(i.dist > 13.67*rad/15){
-        //     line(temp,i.start,i.end,Scalar(rng.uniform(0,205),rng.uniform(0,200),rng.uniform(0,200)));
-        // }
+        else if(i.dist > 13.67*rad/15.32){
+            long_num++;
+            line(lo,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
+        }
+        else{
+            line(un,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
+        }
     }
+    cout << "pair:  " << ptp.size() << endl;
+    cout << "short: " << short_num << endl;
+    cout << "long:  " << long_num << endl;
+    cout << "unuse: " << ptp.size() - long_num - short_num << endl;
 
     // for(const auto& pt:pts){
     //     circle(temp,pt,3,Scalar(255,255,255));
@@ -72,6 +89,20 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     // circle(temp,center,3,Scalar(255,255,255));
     
     // resize(temp,temp,Size(),5,5);
-    imshow("brisk",temp);
+    imshow("brisk_short",sh);
+    imshow("brisk_long",lo);
+    imshow("brisk_unuse",un);
     waitKey(0);
+}
+
+void brisk_compare(){
+    Mat a,b;
+    a = Mat::zeros(4,1,CV_8U);
+    b = Mat::zeros(4,1,CV_8U);
+    a.at<unsigned int>(3,0) = 255;
+    b.at<unsigned int>(1,0) = 1;
+
+    double dist_ham = norm(a,b,NORM_HAMMING);
+    cout << a << endl;
+    cout << dist_ham << endl;
 }

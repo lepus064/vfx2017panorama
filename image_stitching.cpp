@@ -76,11 +76,15 @@ int main(int argc, char**argv){
     // imshow("fastt",temp2);
     // waitKey(0);
     brisk_short(images[0],kps[0][0],100);
+    // brisk_compare();
     // for(auto i:kps){
     //     if(i.response > 2000)
     //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
     // }
 
+
+    /* cylindrical */
+    
     // cylindrical(temp, kps,704.916);
     // cylindrical(temp2,kps,706.286);
     // imshow("right",temp);

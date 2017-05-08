@@ -13,5 +13,6 @@
 
 double get_gs_value(const cv::Mat& src, cv::Point pt);
 void brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
+void brisk_compare();
 
 #endif
