@@ -60,7 +60,7 @@ int main(int argc, char**argv){
     //     FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
     // }
 
-    // fast_detect(images[0],kps[0][0],9,16);
+    // fast_detect(images[0],kps[0][0],5,8);
 
     //create octaves
     Mat temp = images[0].clone();
@@ -85,14 +85,14 @@ int main(int argc, char**argv){
         kps1.push_back(temp_kps2);
         // waitKey(0);
     }
+    vector<KeyPoint> temp_kps0; //d0
+    fast_detect(temp,temp_kps0,5,8);
+    kps1.push_front(temp_kps0);
+
     for(auto i:kps1)
         drawKeypoints(temp,i,temp);
     imshow("all keypoint",temp);
     waitKey(0);
-        
-
-
-
 
     // Mat temp2;
     // drawKeypoints(temp,kps[0][0],temp2);
@@ -272,7 +272,7 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
         }
     }
     
-    reduce_point(fast_sc,edge+2);
+    reduce_point(fast_sc,5);
     Mat fast_mat(temp.rows,temp.cols,CV_8U,Scalar(0));
     kps.clear();
 
