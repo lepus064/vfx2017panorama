@@ -170,7 +170,15 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
         pts.push_back(Point(2,0));
     }
     else if(v2 == 8 && v1 == 5){
-        edge = 2;
+        edge = 1;
+        pts.push_back(Point(1,0));
+        pts.push_back(Point(2,0));
+        pts.push_back(Point(2,1));
+        pts.push_back(Point(2,2));
+        pts.push_back(Point(1,2));
+        pts.push_back(Point(0,2));
+        pts.push_back(Point(0,1));
+        pts.push_back(Point(0,0));
     }
     auto temp = src;
     cvtColor(temp,temp,CV_RGB2GRAY);
@@ -193,43 +201,68 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
             Mat sub_m = temp(rect);
             int center = sub_m.at<uchar>(edge,edge);
             int count = 0;
-            if(abs(center - sub_m.at<uchar>(pts[0])) > 50)
+            if(v2 == 16 && v1 == 9){
+                if(abs(center - sub_m.at<uchar>(pts[0])) > 50)
                     count++;
-            if(abs(center - sub_m.at<uchar>(pts[8])) > 50)
+                if(abs(center - sub_m.at<uchar>(pts[8])) > 50)
+                        count++;
+                if(count == 0)
+                    continue;
+                if(abs(center - sub_m.at<uchar>(pts[4])) > 50)
                     count++;
-            if(count == 0)
-                continue;
-            if(abs(center - sub_m.at<uchar>(pts[4])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[12])) > 50)
-                count++;
-            if(count < 3)
-                continue;
-            if(abs(center - sub_m.at<uchar>(pts[1])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[2])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[3])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[5])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[6])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[7])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[9])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[10])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[11])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[13])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[14])) > 50)
-                count++;
-            if(abs(center - sub_m.at<uchar>(pts[15])) > 50)
-                count++;
-            if(count >= 9){
+                if(abs(center - sub_m.at<uchar>(pts[12])) > 50)
+                    count++;
+                if(count < 3)
+                    continue;
+                if(abs(center - sub_m.at<uchar>(pts[1])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[2])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[3])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[5])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[6])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[7])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[9])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[10])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[11])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[13])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[14])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[15])) > 50)
+                    count++;
+            }
+            else if(v2 == 8 && v1 == 5){
+                if(abs(center - sub_m.at<uchar>(pts[0])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[4])) > 50)
+                    count++;
+                if(count == 0)
+                    continue;
+                if(abs(center - sub_m.at<uchar>(pts[2])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[6])) > 50)
+                    count++;
+                if(count < 3)
+                    continue;
+                if(abs(center - sub_m.at<uchar>(pts[1])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[3])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[5])) > 50)
+                    count++;
+                if(abs(center - sub_m.at<uchar>(pts[7])) > 50)
+                    count++;
+            }
+            
+            if(count >= v1){
                 // cout << "(" << i+edge << "," << j+edge << ")" << " ";
                 // cout << fast_score(sub_m,pts) << endl;
                 // fast_sc.at<unsigned short>(i+edge, j+edge) = fast_score(sub_m,pts);
@@ -239,7 +272,7 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2){
         }
     }
     
-    reduce_point(fast_sc,5);
+    reduce_point(fast_sc,edge+2);
     Mat fast_mat(temp.rows,temp.cols,CV_8U,Scalar(0));
     kps.clear();
 
