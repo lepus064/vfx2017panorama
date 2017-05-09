@@ -45,12 +45,10 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     r[1] = 4.9*f;
     r[2] = 7.4*f;
     r[3] = 10.8*f;
-
     
     pt_value pv;
     pv.point = center;
     pv.I = blurred_img[0].at<uchar>(center);
-    // pts.push_back(center);
     pvs.push_back(pv);
 
     for(int i=0;i<r.size();i++){
@@ -98,29 +96,37 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     gy /= 870;
     cout << gx << endl;
     cout << gy << endl;
-    cout << sqrt(gx*gx+gy*gy) << endl;
-    cout << atan2(gy,gx) << endl;
-    cout << atan2(0,-1) << endl;
-    RNG rng(12345);
+    // cout << sqrt(gx*gx+gy*gy) << endl;
+    double angel = atan2(gy,gx);
+    cout << "angel: " << atan2(gy,gx) << endl;
+    cout << cos(-atan2(0,-1)) << endl;
+
     int short_num = short_pair.size();
     int long_num = long_pair.size();
 
-    cout << "short: " << short_num << endl;
-    cout << "long:  " << long_num << endl;
+    /* Start short brisk */
+    pvs.clear();
+    pt_value pv_short;
+    pv_short.point = center;
+    pv_short.I = blurred_img[0].at<uchar>(center);
+    pvs.push_back(pv_short);
+
+    // cout << "short: " << short_num << endl;
+    // cout << "long:  " << long_num << endl;
     // cout << "unuse: " << ptp.size() - long_num - short_num << endl;
 
     // for(const auto& pt:pts){
     //     circle(temp,pt,3,Scalar(255,255,255));
     // }
 
-    cout << M_PI << endl;
+    // cout << M_PI << endl;
     // circle(temp,center,3,Scalar(255,255,255));
     
     // resize(temp,temp,Size(),5,5);
-    imshow("brisk_short",sh);
-    imshow("brisk_long",lo);
-    imshow("brisk_unuse",un);
-    waitKey(0);
+    // imshow("brisk_short",sh);
+    // imshow("brisk_long",lo);
+    // imshow("brisk_unuse",un);
+    // waitKey(0);
 }
 
 void brisk_compare(){
