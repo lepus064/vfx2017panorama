@@ -53,6 +53,7 @@ int main(int argc, char**argv){
     vector<Point> pts;
     vector<vector<KeyPoint> > all_kps;
     vector<vector<double> > response_octave;
+    vector<vector<Mat> > brisk_d;
 
     get_img_in_dir(argv[1], images);
     // create_octaves(images[0]);
@@ -62,7 +63,7 @@ int main(int argc, char**argv){
     all_kps.push_back(get_fast_keypoint(images[0]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
     brisk_short(images[0],all_kps[0][0],1);
-    
+    // brisk_compare();
 
     //kps[images][octaves][keypoints]
     // kps[0].resize(9);

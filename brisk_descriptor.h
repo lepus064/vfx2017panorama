@@ -1,5 +1,5 @@
-#ifndef BRISK_DISCIPTOR_H
-#define BRISK_DISCIPTOR_H
+#ifndef BRISK_DESCIPTOR_H
+#define BRISK_DESCIPTOR_H
 
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/core.hpp"
@@ -26,7 +26,7 @@ struct pt_value{
 
 
 double get_gs_value(const cv::Mat& src, cv::Point pt);
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
+cv::Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
 void brisk_compare();
 
 #endif

@@ -3,14 +3,16 @@
 using namespace std;
 using namespace cv;
 
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
+Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     Rect rect(0, 0, 350, 350);
     Mat temp = src(rect);
-    cvtColor(temp,temp,CV_RGB2GRAY);
+    
     Mat sh,lo,un;
     sh = temp.clone();
     lo = temp.clone();
     un = temp.clone();
+
+    cvtColor(temp,temp,CV_RGB2GRAY);
     
     vector<Mat> blurred_img(5);
     double blur_f = 0.5*oc_size;
@@ -94,12 +96,12 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     }
     gx /= 870;
     gy /= 870;
-    cout << gx << endl;
-    cout << gy << endl;
+    // cout << gx << endl;
+    // cout << gy << endl;
     // cout << sqrt(gx*gx+gy*gy) << endl;
     double angel = atan2(gy,gx);
-    cout << "angel: " << atan2(gy,gx) << endl;
-    cout << cos(-atan2(0,-1)) << endl;
+    // cout << "angel: " << atan2(gy,gx)/3.14159/2*360 << endl;
+    // cout << cos(-atan2(0,-1)) << endl;
 
     int short_num = short_pair.size();
     int long_num = long_pair.size();
@@ -110,6 +112,59 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     pv_short.point = center;
     pv_short.I = blurred_img[0].at<uchar>(center);
     pvs.push_back(pv_short);
+
+    for(int i=0;i<r.size();i++){
+        for(int j=0;j<r_num[i];j++){
+            double x = center.x + r[i]*cos(angel+2*M_PI*j/double(r_num[i]));
+            double y = center.y + r[i]*sin(angel+2*M_PI*j/double(r_num[i]));
+            // pts.push_back(Point2f(x,y));
+            pt_value temp_pv;
+            temp_pv.point = Point2f(x,y);
+            temp_pv.I = blurred_img[i+1].at<uchar>(temp_pv.point);
+            pvs.push_back(temp_pv);
+        }
+    }
+    short_pair.clear();
+    for(int i=0; i<pvs.size()-1;i++){
+        for(int j=i+1; j < pvs.size() ;j++){
+            pt_pair temp_pr;
+            temp_pr.start = pvs[i].point;
+            temp_pr.end = pvs[j].point;
+            double x_x = abs(pvs[i].point.x - pvs[j].point.x);
+            double y_y = abs(pvs[i].point.y - pvs[j].point.y);
+            temp_pr.dist = sqrt(x_x*x_x + y_y*y_y);
+            temp_pr.S_I = pvs[i].I;
+            temp_pr.E_I = pvs[j].I;
+            if(temp_pr.dist < 5.85*oc_size)
+                short_pair.push_back(temp_pr);
+            // else if(temp_pr.dist > 8.2*oc_size)
+            //     long_pair.push_back(temp_pr);
+        }
+    }
+    Mat brisk_des = Mat::zeros(64,1,CV_8U);
+    int bi_count = 0; //0~7
+    auto bv = brisk_des.ptr();
+    // cout << short_pair.size() << endl;
+
+    for(const auto& i:short_pair){
+        if(i.E_I > i.S_I){
+            *bv += pow(2,bi_count);
+        }
+        bi_count++;
+        if(bi_count == 8){
+            bv++;
+            bi_count = 0;
+        }
+    }
+    // cout << brisk_des << endl;
+
+    /* draw for testing */
+    // for(auto i:short_pair){
+    //     line(sh,i.start,i.end,Scalar(255,255,255));
+    // }
+    // long_pair.clear();
+
+    return brisk_des;
 
     // cout << "short: " << short_num << endl;
     // cout << "long:  " << long_num << endl;
@@ -133,10 +188,10 @@ void brisk_compare(){
     Mat a,b;
     a = Mat::zeros(4,1,CV_8U);
     b = Mat::zeros(4,1,CV_8U);
-    a.at<unsigned int>(3,0) = 255;
+    a.at<unsigned short>(3,0) = 2550;
     b.at<unsigned int>(1,0) = 1;
 
-    double dist_ham = norm(a,b,NORM_HAMMING);
+    // double dist_ham = norm(a,b,NORM_HAMMING);
     cout << a << endl;
-    cout << dist_ham << endl;
+    // cout << dist_ham << endl;
 }
