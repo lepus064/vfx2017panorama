@@ -35,7 +35,7 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     Point2f center(temp.rows/2.0-0.5,temp.cols/2.0-0.5);
 
     // drawKeypoints(src,kp,temp);
-    vector<Point2f> pts;
+    // vector<Point2f> pts;
     vector<pt_value> pvs;
     vector<double> r(4);
     vector<int> r_num{10,14,15,20}; 
@@ -46,16 +46,22 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     r[2] = 7.4*f;
     r[3] = 10.8*f;
 
-    pts.push_back(center);
+    
     pt_value pv;
     pv.point = center;
     pv.I = blurred_img[0].at<uchar>(center);
+    // pts.push_back(center);
+    pvs.push_back(pv);
 
     for(int i=0;i<r.size();i++){
         for(int j=0;j<r_num[i];j++){
             double x = center.x + r[i]*cos(2*M_PI*j/double(r_num[i]));
             double y = center.y + r[i]*sin(2*M_PI*j/double(r_num[i]));
-            pts.push_back(Point2f(x,y));
+            // pts.push_back(Point2f(x,y));
+            pt_value temp_pv;
+            temp_pv.point = Point2f(x,y);
+            temp_pv.I = blurred_img[i+1].at<uchar>(temp_pv.point);
+            pvs.push_back(temp_pv);
         }
     }
     
@@ -63,21 +69,38 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     vector<pt_pair> short_pair;
     vector<pt_pair> unuse_pair;
 
-    for(int i=0; i<pts.size()-1;i++){
-        for(int j=i+1; j < pts.size() ;j++){
+    for(int i=0; i<pvs.size()-1;i++){
+        for(int j=i+1; j < pvs.size() ;j++){
             pt_pair temp_pr;
-            temp_pr.start = pts[i];
-            temp_pr.end = pts[j];
-            double x_x = abs(pts[i].x - pts[j].x);
-            double y_y = abs(pts[i].y - pts[j].y);
+            temp_pr.start = pvs[i].point;
+            temp_pr.end = pvs[j].point;
+            double x_x = abs(pvs[i].point.x - pvs[j].point.x);
+            double y_y = abs(pvs[i].point.y - pvs[j].point.y);
             temp_pr.dist = sqrt(x_x*x_x + y_y*y_y);
+            temp_pr.S_I = pvs[i].I;
+            temp_pr.E_I = pvs[j].I;
             if(temp_pr.dist < 5.85*oc_size)
                 short_pair.push_back(temp_pr);
             else if(temp_pr.dist > 8.2*oc_size)
                 long_pair.push_back(temp_pr);
         }
     }
-
+    double gx = 0;
+    double gy = 0;
+    for(const auto& i:long_pair){
+        double E = (i.E_I - i.S_I);
+        double dx = (i.end.x - i.start.x)*E/i.dist/i.dist;
+        double dy = (i.end.y - i.start.y)*E/i.dist/i.dist;
+        gx += dx;
+        gy += dy;
+    }
+    gx /= 870;
+    gy /= 870;
+    cout << gx << endl;
+    cout << gy << endl;
+    cout << sqrt(gx*gx+gy*gy) << endl;
+    cout << atan2(gy,gx) << endl;
+    cout << atan2(0,-1) << endl;
     RNG rng(12345);
     int short_num = short_pair.size();
     int long_num = long_pair.size();
