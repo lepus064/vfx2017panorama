@@ -11,6 +11,20 @@
 #include <vector>
 #include <cmath>
 
+struct pt_pair{
+    cv::Point2f start;
+    cv::Point2f end;
+    double dist;
+    double S_I;
+    double E_I;
+};
+
+struct pt_value{
+    cv::Point2f point;
+    double I;
+};
+
+
 double get_gs_value(const cv::Mat& src, cv::Point pt);
 void brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
 void brisk_compare();
