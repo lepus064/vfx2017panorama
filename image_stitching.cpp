@@ -95,13 +95,7 @@ int main(int argc, char**argv){
     //         cout << j.response << endl;
     //     }
     // }
-    for(int i = 1;i<kps1.size();i++){
-        Mat octave0 = Mat::zeros(temp.rows,temp.cols,CV_16U);
-        Mat octave1 = Mat::zeros(temp.rows,temp.cols,CV_16U);
-        Mat octave2 = Mat::zeros(temp.rows,temp.cols,CV_16U);
-        imshow("o1",octave0);
-        waitKey(0);
-    }
+    vector<KeyPoint> image1_kps = reduce_pt_from_octaves(temp,kps1);
 
     // drawKeypoints(temp,i,temp);
     // imshow("all keypoint",temp);
@@ -395,5 +389,35 @@ void keypoint_real_post(vector<KeyPoint>& kps, double f){
 }
 vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > all_kps){
     vector<KeyPoint> res;
+    
+    for(int i = 1;i<all_kps.size()-1;i++){
+        Mat octave0 = Mat::zeros(src.rows,src.cols,CV_16U);
+        Mat octave1 = Mat::zeros(src.rows,src.cols,CV_16U);
+        Mat octave2 = Mat::zeros(src.rows,src.cols,CV_16U);
+        for(const auto& j:all_kps[i-1]){
+            octave0.at<unsigned short>(j.pt) = j.response;
+        }
+        // for(const auto& j:all_kps[i]){
+        //     octave1.at<unsigned short>(j.pt) = j.response;
+        // }
+        for(const auto& j:all_kps[i+1]){
+            octave2.at<unsigned short>(j.pt) = j.response;
+        }
+        for(const auto& j:all_kps[i]){
+            bool true_kp = true;
+            int x0 = j.pt.x-1;
+            int y0 = j.pt.y-1;
+            int max_res = 0;
+            for(int k = x0;k<x0+2;k++){
+                for(int l = y0;l<y0+2;l++){
+                    if(max_res < octave0.at<unsigned short>(l,k))
+                        max_res = octave0.at<unsigned short>(l,k);
+                    if(max_res < octave2.at<unsigned short>(l,k))
+                        max_res = octave2.at<unsigned short>(l,k);
+                }
+            }
+        }
+
+    }
     return res;
 }
