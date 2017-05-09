@@ -35,7 +35,8 @@ void reduce_point(Mat& src, int rad);
 void keypoint_real_post(vector<KeyPoint>& kps, double f);
 vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > all_kps);
 vector<KeyPoint> get_fast_keypoint(const Mat& src);
-
+vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src);
+double get_octave_size(int octave);
 
 int main(int argc, char**argv){
 
@@ -51,6 +52,7 @@ int main(int argc, char**argv){
     vector<string> names;
     vector<Point> pts;
     vector<vector<KeyPoint> > all_kps;
+    vector<vector<double> > response_octave;
 
     get_img_in_dir(argv[1], images);
     // create_octaves(images[0]);
@@ -58,6 +60,10 @@ int main(int argc, char**argv){
     vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
     all_kps.push_back(get_fast_keypoint(images[0]));
+    // get_subpixel_and_octave(all_kps[0],images[0]);
+    brisk_short(images[0],all_kps[0][0],1);
+    
+
     //kps[images][octaves][keypoints]
     // kps[0].resize(9);
     // for(int i=0;i<images.size();i++){
@@ -374,10 +380,11 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
                 }
             }
             if(max_res < j.response){
-                if(i%2 == 0)
-                    j.octave = 2.0/3.0/pow(2,(i/2)-1);
-                else
-                    j.octave = 1.0/pow(2,(i-1)/2);
+                j.octave = i-1;
+                // if(i%2 == 0)
+                //     j.octave = 2.0/3.0/pow(2,(i/2)-1);
+                // else
+                //     j.octave = 1.0/pow(2,(i-1)/2);
                 res.push_back(j);
             }
         }
@@ -417,8 +424,39 @@ vector<KeyPoint> get_fast_keypoint(const Mat& src){
 
     vector<KeyPoint> res = reduce_pt_from_octaves(temp,kps1);
 
-    drawKeypoints(temp,res,temp);
-    imshow("all point reduce",temp);
-    waitKey(0);
+    /* Draw all keypoints */
+    // drawKeypoints(temp,res,temp);
+    // imshow("all point reduce",temp);
+    // waitKey(0);
     return res;
+}
+
+//Not done
+vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src){
+    // for(auto i:kps){
+    //     get_octave_size(i.octave);
+    // }
+        // if(i.octave > 0)
+        //     cout << "Response: " << i.response << ", octave:" << i.octave << endl;
+    // cout << kps.size() << endl;
+    vector<double> res;
+    return res;
+}
+
+double get_octave_size(int octave){
+    /* 
+    octave number
+    0 -> c0 -> 1
+    1 -> d0 -> 2/3
+    2 -> c1 -> 1/2
+    3 -> d1 -> 1/3
+    4 -> c2 -> 1/4
+    5 -> d2 -> 1/6
+    6 -> c3 -> 1/8
+    7 -> d3 -> 1/12
+    */
+    if(octave%2 == 0)
+        return 1.0/pow(2,octave/2); 
+    else
+        return 2.0/3.0/pow(2,(octave-1)/2);
 }

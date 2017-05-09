@@ -9,7 +9,7 @@ struct pt_pair{
     double dist;
 };
 
-void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
+void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     Rect rect(0, 0, 350, 350);
     Mat temp = src(rect);
     Mat sh,lo,un;
@@ -17,11 +17,11 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     lo = temp.clone();
     un = temp.clone();
     Mat temp2;
-    // GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
-    // imshow("src",src);
+    GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
+    imshow("src",src);
     // imshow("temp", temp);
-    // imshow("temp2", temp2);
-    // waitKey(0);
+    imshow("temp2", temp2);
+    waitKey(0);
 
     cout << temp.rows/2-0.5 << endl;
     Point2f center(temp.rows/2.0-0.5,temp.cols/2.0-0.5);
@@ -30,10 +30,10 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     vector<double> r;
     vector<int> r_num{10,14,15,20}; 
 
-    r.push_back(double(rad)*2.9/10.8);
-    r.push_back(double(rad)*4.9/10.8);
-    r.push_back(double(rad)*7.4/10.8);
-    r.push_back(double(rad));
+    r.push_back(double(oc_size)*2.9/10.8);
+    r.push_back(double(oc_size)*4.9/10.8);
+    r.push_back(double(oc_size)*7.4/10.8);
+    r.push_back(double(oc_size));
 
     pts.push_back(center);
 
@@ -64,11 +64,11 @@ void brisk_short(const cv::Mat& src,cv::KeyPoint kp,double rad){
     int short_num = 0;
     int long_num = 0;
     for(const auto &i:ptp){
-        if(i.dist < 9.75*rad/15.34){
+        if(i.dist < 9.75*oc_size/15.34){
             short_num++;
             line(sh,i.start,i.end,Scalar(rng.uniform(100,150),rng.uniform(100,150),rng.uniform(100,150)));
         }
-        else if(i.dist > 13.67*rad/15.32){
+        else if(i.dist > 13.67*oc_size/15.32){
             long_num++;
             line(lo,i.start,i.end,Scalar(rng.uniform(100,205),rng.uniform(100,200),rng.uniform(100,200)));
         }
