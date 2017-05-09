@@ -181,14 +181,28 @@ Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     // waitKey(0);
 }
 
-void brisk_compare(){
-    Mat a,b;
-    a = Mat::zeros(4,1,CV_8U);
-    b = Mat::zeros(4,1,CV_8U);
-    a.at<unsigned short>(3,0) = 2550;
-    b.at<unsigned int>(1,0) = 1;
+double brisk_compare(const Mat &a, const Mat &b){
+    // Mat a,b;
+    // a = Mat::zeros(4,1,CV_8U);
+    // b = Mat::zeros(4,1,CV_8U);
+    // a.at<unsigned short>(3,0) = 2550;
+    // b.at<unsigned int>(1,0) = 1;
 
-    // double dist_ham = norm(a,b,NORM_HAMMING);
-    cout << a << endl;
-    // cout << dist_ham << endl;
+    return norm(a,b,NORM_HAMMING);
+}
+
+int key_pair(const Mat& a, const vector<Mat> &b, int thres){
+    int min_dist = 512;
+    int which = 0;
+    for(int i = 0;i<b.size();i++){
+        if(min_dist > brisk_compare(a,b[i]))
+            min_dist = brisk_compare(a,b[i]);
+        which = i;
+    }
+    // if(min_dist < thres)
+    //     cout << min_dist << endl;
+    if(min_dist > thres)
+        return -1;
+    else
+        return which;
 }

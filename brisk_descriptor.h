@@ -27,6 +27,7 @@ struct pt_value{
 
 double get_gs_value(const cv::Mat& src, cv::Point pt);
 cv::Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp, double rad);
-void brisk_compare();
+double brisk_compare(const cv::Mat &a, const cv::Mat &b);
+int key_pair(const cv::Mat& a, const std::vector<cv::Mat> &b, int thres);
 
 #endif

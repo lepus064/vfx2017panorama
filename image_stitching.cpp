@@ -73,6 +73,30 @@ int main(int argc, char**argv){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
     }
+    int min_dist = 512;
+    int max_dist = 0;
+    Mat r1,r2;
+    r1 = images[0].clone();
+    r2 = images[1].clone();
+
+    for(int i = 0; i < brisk_d[0].size();i++){
+        int a = key_pair(brisk_d[0][i],brisk_d[1],120);
+        if(a != -1){
+            circle(r1,all_kps[0][i].pt,3,Scalar(255,0,0));
+            circle(r2,all_kps[1][a].pt,3,Scalar(255,0,0));//had bug!!!!
+        }
+    }
+    // for(const auto i:brisk_d[0]){
+    //     int a = key_pair(i,brisk_d[1],100);
+    //     if(a != -1){
+    //         circle(r1,all_kps[0][i])
+    //     }
+    //     if(a<min_dist && a != -1)
+    //         min_dist = a;
+    // }
+    imshow("r1",r1);
+    imshow("r2",r2);
+    waitKey(0);
 
     // brisk_d.push_back(tp);
     
