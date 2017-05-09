@@ -56,18 +56,25 @@ int main(int argc, char**argv){
     vector<vector<Mat> > brisk_d;
 
     get_img_in_dir(argv[1], images);
+    brisk_d.resize(images.size());
     // create_octaves(images[0]);
 
     vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
-    all_kps.push_back(get_fast_keypoint(images[0]));
+    for(const auto& i:images){
+        all_kps.push_back(get_fast_keypoint(i));
+    }
+    // all_kps.push_back(get_fast_keypoint(images[0]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
     vector<Mat> tp;
-    for(auto i : all_kps[0]){
-        Mat ttt = brisk_short(images[0],i,get_octave_size(i.octave));
-        tp.push_back(ttt);
+    for(int j = 0;j<2;j++){
+        cout << "calculating image " << j << endl;
+        for(auto i : all_kps[j]){
+            brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
+        }
     }
-    brisk_d.push_back(tp);
+
+    // brisk_d.push_back(tp);
     
     // brisk_compare();
 
