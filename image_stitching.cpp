@@ -5,7 +5,7 @@
 #include "opencv2/features2d.hpp"
 #include "opencv2/core/matx.hpp"
 #include "brisk_descriptor.h"
-#include "cylindrical.h"
+#include "cylindrical.h" 
 #include <dirent.h>
 
 #include <algorithm>
@@ -53,7 +53,6 @@ int main(int argc, char**argv){
     get_img_in_dir(argv[1], images);
     // create_octaves(images[0]);
 
-
     vector<vector<vector<KeyPoint> > > kps(images.size());
     //kps[images][octaves][keypoints]
     // kps[0].resize(9);
@@ -64,7 +63,7 @@ int main(int argc, char**argv){
     // fast_detect(images[0],kps[0][0],5,8);
 
     //create octaves
-    Mat temp = images[0].clone();
+    Mat temp = images[5].clone();
     vector<Mat> c_temp; //  0 ~ 3
     vector<Mat> d_temp; // -1 ~ 3
     create_octaves(temp,c_temp,d_temp);
@@ -90,21 +89,15 @@ int main(int argc, char**argv){
     fast_detect(temp,temp_kps0,5,8);
     kps1.push_front(temp_kps0);
 
-    // for(auto i:kps1){
-    //     for(auto j:i){
-    //         cout << j.response << endl;
-    //     }
-    // }
     vector<KeyPoint> image1_kps = reduce_pt_from_octaves(temp,kps1);
 
-    // drawKeypoints(temp,i,temp);
-    // imshow("all keypoint",temp);
-    // waitKey(0);
+    drawKeypoints(temp,image1_kps,temp);
+    imshow("all point reduce",temp);
 
     // Mat temp2;
     // drawKeypoints(temp,kps[0][0],temp2);
     // imshow("fastt",temp2);
-    // waitKey(0);
+    waitKey(0);
 
     // brisk_short(images[0],kps[0][0],100);
     // brisk_compare();
@@ -342,9 +335,6 @@ void reduce_point(Mat& src, int rad){
                     }
                 } 
             }
-            // int a;
-            // cin >> a;
-           
             //         if(sub_m.at<uchar>(k,l)>center){
             //             src.at<unsigned short>(i+(rad-1)/2,j+(rad-1)/2) = 0;
             //             // break;
@@ -392,14 +382,12 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
     
     for(int i = 1;i<all_kps.size()-1;i++){
         Mat octave0 = Mat::zeros(src.rows,src.cols,CV_16U);
-        Mat octave1 = Mat::zeros(src.rows,src.cols,CV_16U);
+        // Mat octave1 = Mat::zeros(src.rows,src.cols,CV_16U);
         Mat octave2 = Mat::zeros(src.rows,src.cols,CV_16U);
+
         for(const auto& j:all_kps[i-1]){
             octave0.at<unsigned short>(j.pt) = j.response;
         }
-        // for(const auto& j:all_kps[i]){
-        //     octave1.at<unsigned short>(j.pt) = j.response;
-        // }
         for(const auto& j:all_kps[i+1]){
             octave2.at<unsigned short>(j.pt) = j.response;
         }
@@ -415,6 +403,9 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
                     if(max_res < octave2.at<unsigned short>(l,k))
                         max_res = octave2.at<unsigned short>(l,k);
                 }
+            }
+            if(max_res < j.response){
+                res.push_back(j);
             }
         }
 
