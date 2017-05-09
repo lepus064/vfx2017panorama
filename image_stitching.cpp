@@ -34,6 +34,7 @@ int fast_score(const Mat &src, const vector<Point> &pts);
 void reduce_point(Mat& src, int rad);
 void keypoint_real_post(vector<KeyPoint>& kps, double f);
 vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > all_kps);
+vector<KeyPoint> get_fast_keypoint(const Mat& src);
 
 
 int main(int argc, char**argv){
@@ -49,11 +50,14 @@ int main(int argc, char**argv){
     vector<double> times;
     vector<string> names;
     vector<Point> pts;
+    vector<vector<KeyPoint> > all_kps;
 
     get_img_in_dir(argv[1], images);
     // create_octaves(images[0]);
 
-    vector<vector<vector<KeyPoint> > > kps(images.size());
+    vector<vector<vector<KeyPoint> > > kpss(images.size());
+    // Mat temp_mat = .clone();
+    all_kps.push_back(get_fast_keypoint(images[0]));
     //kps[images][octaves][keypoints]
     // kps[0].resize(9);
     // for(int i=0;i<images.size();i++){
@@ -62,42 +66,7 @@ int main(int argc, char**argv){
 
     // fast_detect(images[0],kps[0][0],5,8);
 
-    //create octaves
-    Mat temp = images[5].clone();
-    vector<Mat> c_temp; //  0 ~ 3
-    vector<Mat> d_temp; // -1 ~ 3
-    create_octaves(temp,c_temp,d_temp);
-
-    //keypoint from octaves
-    deque<vector<KeyPoint> > kps1; 
-    for(int i = 0;i<4;i++){
-        vector<KeyPoint> temp_kps1;
-        vector<KeyPoint> temp_kps2;
-        fast_detect(c_temp[i],temp_kps1,9,16);
-        fast_detect(d_temp[i+1],temp_kps2,9,16);
-        // drawKeypoints(c_temp[i],temp_kps1,c_temp[i]);
-        // drawKeypoints(d_temp[i+1],temp_kps2,d_temp[i+1]);
-        keypoint_real_post(temp_kps1,pow(2,i));
-        keypoint_real_post(temp_kps2,1.5*pow(2,i));
-        // imshow("c",c_temp[i]);
-        // imshow("d",d_temp[i+1]);
-        kps1.push_back(temp_kps1);
-        kps1.push_back(temp_kps2);
-        // waitKey(0);
-    }
-    vector<KeyPoint> temp_kps0; //d0
-    fast_detect(temp,temp_kps0,5,8);
-    kps1.push_front(temp_kps0);
-
-    vector<KeyPoint> image1_kps = reduce_pt_from_octaves(temp,kps1);
-
-    drawKeypoints(temp,image1_kps,temp);
-    imshow("all point reduce",temp);
-
-    // Mat temp2;
-    // drawKeypoints(temp,kps[0][0],temp2);
-    // imshow("fastt",temp2);
-    waitKey(0);
+    
 
     // brisk_short(images[0],kps[0][0],100);
     // brisk_compare();
@@ -391,7 +360,7 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
         for(const auto& j:all_kps[i+1]){
             octave2.at<unsigned short>(j.pt) = j.response;
         }
-        for(const auto& j:all_kps[i]){
+        for(auto j:all_kps[i]){
             bool true_kp = true;
             int x0 = j.pt.x-1;
             int y0 = j.pt.y-1;
@@ -405,10 +374,51 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
                 }
             }
             if(max_res < j.response){
+                if(i%2 == 0)
+                    j.octave = 2.0/3.0/pow(2,(i/2)-1);
+                else
+                    j.octave = 1.0/pow(2,(i-1)/2);
                 res.push_back(j);
             }
         }
 
     }
+    return res;
+}
+
+vector<KeyPoint> get_fast_keypoint(const Mat& src){
+    
+    //create octaves
+    Mat temp = src.clone();
+    vector<Mat> c_temp; //  0 ~ 3
+    vector<Mat> d_temp; // -1 ~ 3
+    create_octaves(temp,c_temp,d_temp);
+
+    //keypoint from octaves
+    deque<vector<KeyPoint> > kps1; 
+    for(int i = 0;i<4;i++){
+        vector<KeyPoint> temp_kps1;
+        vector<KeyPoint> temp_kps2;
+        fast_detect(c_temp[i],temp_kps1,9,16);
+        fast_detect(d_temp[i+1],temp_kps2,9,16);
+        // drawKeypoints(c_temp[i],temp_kps1,c_temp[i]);
+        // drawKeypoints(d_temp[i+1],temp_kps2,d_temp[i+1]);
+        keypoint_real_post(temp_kps1,pow(2,i));
+        keypoint_real_post(temp_kps2,1.5*pow(2,i));
+        // imshow("c",c_temp[i]);
+        // imshow("d",d_temp[i+1]);
+        kps1.push_back(temp_kps1);
+        kps1.push_back(temp_kps2);
+        // waitKey(0);
+    }
+    vector<KeyPoint> temp_kps0; //d0
+    fast_detect(temp,temp_kps0,5,8);
+    kps1.push_front(temp_kps0);
+
+    vector<KeyPoint> res = reduce_pt_from_octaves(temp,kps1);
+
+    drawKeypoints(temp,res,temp);
+    imshow("all point reduce",temp);
+    waitKey(0);
     return res;
 }
