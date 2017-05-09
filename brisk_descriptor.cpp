@@ -4,9 +4,9 @@ using namespace std;
 using namespace cv;
 
 Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
-    Rect rect(0, 0, 350, 350);
-    Mat temp = src(rect);
-    
+    // Rect rect(0, 0, 350, 350);
+    // Mat temp = src(rect);
+    Mat temp = src.clone();
     Mat sh,lo,un;
     sh = temp.clone();
     lo = temp.clone();
@@ -26,15 +26,12 @@ Mat brisk_short(const cv::Mat& src,cv::KeyPoint kp,double oc_size){
     //     imshow("b",i);
     //     waitKey(0);
     // }
-        
-    // GaussianBlur(temp,temp2, Size(0,0),0.5,0.5);
-    // imshow("src",src);
-    // imshow("temp", temp);
-    // imshow("temp2", temp2);
-    // waitKey(0);
 
     // cout << temp.rows/2-0.5 << endl;
-    Point2f center(temp.rows/2.0-0.5,temp.cols/2.0-0.5);
+
+    /* test center*/
+    Point2f center(kp.pt);
+    // Point2f center(temp.rows/2.0-0.5,temp.cols/2.0-0.5);
 
     // drawKeypoints(src,kp,temp);
     // vector<Point2f> pts;

@@ -62,7 +62,13 @@ int main(int argc, char**argv){
     // Mat temp_mat = .clone();
     all_kps.push_back(get_fast_keypoint(images[0]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
-    brisk_short(images[0],all_kps[0][0],1);
+    vector<Mat> tp;
+    for(auto i : all_kps[0]){
+        Mat ttt = brisk_short(images[0],i,get_octave_size(i.octave));
+        tp.push_back(ttt);
+    }
+    brisk_d.push_back(tp);
+    
     // brisk_compare();
 
     //kps[images][octaves][keypoints]
