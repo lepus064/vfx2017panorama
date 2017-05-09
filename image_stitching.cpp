@@ -33,6 +33,7 @@ void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2);
 int fast_score(const Mat &src, const vector<Point> &pts);
 void reduce_point(Mat& src, int rad);
 void keypoint_real_post(vector<KeyPoint>& kps, double f);
+vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > all_kps);
 
 
 int main(int argc, char**argv){
@@ -69,7 +70,7 @@ int main(int argc, char**argv){
     create_octaves(temp,c_temp,d_temp);
 
     //keypoint from octaves
-    deque<vector<KeyPoint> > kps1;
+    deque<vector<KeyPoint> > kps1; 
     for(int i = 0;i<4;i++){
         vector<KeyPoint> temp_kps1;
         vector<KeyPoint> temp_kps2;
@@ -89,10 +90,22 @@ int main(int argc, char**argv){
     fast_detect(temp,temp_kps0,5,8);
     kps1.push_front(temp_kps0);
 
-    for(auto i:kps1)
-        drawKeypoints(temp,i,temp);
-    imshow("all keypoint",temp);
-    waitKey(0);
+    // for(auto i:kps1){
+    //     for(auto j:i){
+    //         cout << j.response << endl;
+    //     }
+    // }
+    for(int i = 1;i<kps1.size();i++){
+        Mat octave0 = Mat::zeros(temp.rows,temp.cols,CV_16U);
+        Mat octave1 = Mat::zeros(temp.rows,temp.cols,CV_16U);
+        Mat octave2 = Mat::zeros(temp.rows,temp.cols,CV_16U);
+        imshow("o1",octave0);
+        waitKey(0);
+    }
+
+    // drawKeypoints(temp,i,temp);
+    // imshow("all keypoint",temp);
+    // waitKey(0);
 
     // Mat temp2;
     // drawKeypoints(temp,kps[0][0],temp2);
@@ -379,4 +392,8 @@ void keypoint_real_post(vector<KeyPoint>& kps, double f){
         i.pt.x *= f;
         i.pt.y *= f;
     }
+}
+vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > all_kps){
+    vector<KeyPoint> res;
+    return res;
 }
