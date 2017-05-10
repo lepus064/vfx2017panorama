@@ -195,9 +195,10 @@ int key_pair(const Mat& a, const vector<Mat> &b, int thres){
     int min_dist = 512;
     int which = 0;
     for(int i = 0;i<b.size();i++){
-        if(min_dist > brisk_compare(a,b[i]))
+        if(min_dist > brisk_compare(a,b[i])){
             min_dist = brisk_compare(a,b[i]);
-        which = i;
+            which = i;
+        }
     }
     // if(min_dist < thres)
     //     cout << min_dist << endl;

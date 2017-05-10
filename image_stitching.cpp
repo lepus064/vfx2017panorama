@@ -53,7 +53,7 @@ int main(int argc, char**argv){
     vector<Point> pts;
     vector<vector<KeyPoint> > all_kps;
     vector<vector<double> > response_octave;
-    vector<vector<Mat> > brisk_d;
+    vector<vector<Mat> > brisk_d; //[img][brisk_descriptor for keypoint]
 
     get_img_in_dir(argv[1], images);
     brisk_d.resize(images.size());
@@ -61,14 +61,21 @@ int main(int argc, char**argv){
 
     vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
-    for(const auto& i:images){
-        all_kps.push_back(get_fast_keypoint(i));
-    }
-    // all_kps.push_back(get_fast_keypoint(images[0]));
+
+    // for(const auto& i:images){
+    //     all_kps.push_back(get_fast_keypoint(i));
+    // }
+
+    all_kps.push_back(get_fast_keypoint(images[0]));
+    all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
     vector<Mat> tp;
     for(int j = 0;j<2;j++){
         cout << "calculating image " << j << endl;
+        // brisk_d[j].resize(all_kps[j].size());
+        // for(int i = 0; i < all_kps[j].size(); i++){
+        //     brisk_d[j][i] = brisk_short(images[j],all_kps[j][i],get_octave_size(all_kps[j][i].octave));
+        // }
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
@@ -78,22 +85,19 @@ int main(int argc, char**argv){
     Mat r1,r2;
     r1 = images[0].clone();
     r2 = images[1].clone();
+    // drawKeypoints(r2,all_kps[1],r2);
+    // imshow("r2",r2);
+    // waitKey(0);
 
     for(int i = 0; i < brisk_d[0].size();i++){
         int a = key_pair(brisk_d[0][i],brisk_d[1],120);
         if(a != -1){
             circle(r1,all_kps[0][i].pt,3,Scalar(255,0,0));
+            // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
             circle(r2,all_kps[1][a].pt,3,Scalar(255,0,0));//had bug!!!!
         }
     }
-    // for(const auto i:brisk_d[0]){
-    //     int a = key_pair(i,brisk_d[1],100);
-    //     if(a != -1){
-    //         circle(r1,all_kps[0][i])
-    //     }
-    //     if(a<min_dist && a != -1)
-    //         min_dist = a;
-    // }
+
     imshow("r1",r1);
     imshow("r2",r2);
     waitKey(0);
