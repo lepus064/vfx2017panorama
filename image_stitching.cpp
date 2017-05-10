@@ -72,10 +72,6 @@ int main(int argc, char**argv){
     vector<Mat> tp;
     for(int j = 0;j<2;j++){
         cout << "calculating image " << j << endl;
-        // brisk_d[j].resize(all_kps[j].size());
-        // for(int i = 0; i < all_kps[j].size(); i++){
-        //     brisk_d[j][i] = brisk_short(images[j],all_kps[j][i],get_octave_size(all_kps[j][i].octave));
-        // }
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
@@ -88,13 +84,17 @@ int main(int argc, char**argv){
     // drawKeypoints(r2,all_kps[1],r2);
     // imshow("r2",r2);
     // waitKey(0);
-
+    RNG color_bgr;
     for(int i = 0; i < brisk_d[0].size();i++){
         int a = key_pair(brisk_d[0][i],brisk_d[1],120);
         if(a != -1){
-            circle(r1,all_kps[0][i].pt,3,Scalar(255,0,0));
+            
+            int B = color_bgr.uniform(0,255);
+            int G = color_bgr.uniform(0,255);
+            int R = color_bgr.uniform(0,255);
+            circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
             // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
-            circle(r2,all_kps[1][a].pt,3,Scalar(255,0,0));//had bug!!!!
+            circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));//had bug!!!!
         }
     }
 
