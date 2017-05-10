@@ -109,16 +109,24 @@ int main(int argc, char**argv){
             temp_kpp.kp1_ID = i;
             temp_kpp.kp2_ID = a;
             true_kp.push_back(temp_kpp);
-            circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
+            // circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
             // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
-            circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));//had bug!!!!
+            // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
         }
     }
     Ransac(true_kp,5,1000);
+    for(const auto &i:true_kp){
+        int B = color_bgr.uniform(0,255);
+        int G = color_bgr.uniform(0,255);
+        int R = color_bgr.uniform(0,255);
+        circle(r1,i.kp1.pt,3,Scalar(B,G,R));
+        circle(r2,i.kp2.pt,3,Scalar(B,G,R));
+    }
 
-    // imshow("r1",r1);
-    // imshow("r2",r2);
-    // waitKey(0);
+
+    imshow("r1",r1);
+    imshow("r2",r2);
+    waitKey(0);
 
     // brisk_d.push_back(tp);
     
@@ -522,7 +530,7 @@ double get_octave_size(int octave){
 }
 
 void Ransac(vector<kp_pair>& kpp,const int& number, int times){
-    // vector<kp_pair> temp_kpp = kpp;
+    vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
     double bias = 4.0;
     int s = kpp.size();
@@ -555,5 +563,22 @@ void Ransac(vector<kp_pair>& kpp,const int& number, int times){
             final_y = y_y;
         }
     }
-    cout << vote << endl;
+
+    double result_x = 0;
+    double result_y = 0;
+    for(const auto &i:kpp){
+        double x = i.kp1.pt.x - i.kp2.pt.x;
+        double y = i.kp1.pt.y - i.kp2.pt.y;
+        if((x < final_x+bias) && (x > final_x-bias)){
+            if((y < final_y+bias) && (y > final_y-bias)){
+                result_x += x;
+                result_y += y;
+                result_kpp.push_back(i);
+            }
+        }
+    }
+    result_x /= result_kpp.size();
+    result_y /= result_kpp.size();
+    kpp = result_kpp;
+    // cout << vote << endl;
 }
