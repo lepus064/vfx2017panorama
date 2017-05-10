@@ -187,7 +187,6 @@ double brisk_compare(const Mat &a, const Mat &b){
     // b = Mat::zeros(4,1,CV_8U);
     // a.at<unsigned short>(3,0) = 2550;
     // b.at<unsigned int>(1,0) = 1;
-
     return norm(a,b,NORM_HAMMING);
 }
 

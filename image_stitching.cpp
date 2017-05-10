@@ -21,9 +21,17 @@
 #include <vector>
 #include <deque>
 #include <thread>
+#include <cstdlib>
 
 using namespace cv;
 using namespace std;
+
+struct kp_pair{
+    KeyPoint kp1;
+    KeyPoint kp2;
+    int kp1_ID;
+    int kp2_ID;
+};
 
 void loadExposureSeq(string, vector<Mat>&, vector<double>&);
 double weight(int z);
@@ -37,14 +45,16 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
 vector<KeyPoint> get_fast_keypoint(const Mat& src);
 vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src);
 double get_octave_size(int octave);
+void Ransac(vector<kp_pair>& kpp, const int& number, int time);
+int myrandom (int i) { return std::rand()%i;}
 
 int main(int argc, char**argv){
-
+    
     if(argc != 2){
         cout << "Usage: ./hdr_imaging ./Path_to_data" << endl;
         return 0;
     }
-
+    
 
     // Some parameters
     vector<Mat> images; // Example 1024*768
@@ -85,22 +95,30 @@ int main(int argc, char**argv){
     // imshow("r2",r2);
     // waitKey(0);
     RNG color_bgr;
+    vector<kp_pair> true_kp;
+
     for(int i = 0; i < brisk_d[0].size();i++){
         int a = key_pair(brisk_d[0][i],brisk_d[1],120);
         if(a != -1){
-            
             int B = color_bgr.uniform(0,255);
             int G = color_bgr.uniform(0,255);
             int R = color_bgr.uniform(0,255);
+            kp_pair temp_kpp;
+            temp_kpp.kp1 = all_kps[0][i];
+            temp_kpp.kp2 = all_kps[1][a];
+            temp_kpp.kp1_ID = i;
+            temp_kpp.kp2_ID = a;
+            true_kp.push_back(temp_kpp);
             circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
             // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
             circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));//had bug!!!!
         }
     }
+    Ransac(true_kp,5,1000);
 
-    imshow("r1",r1);
-    imshow("r2",r2);
-    waitKey(0);
+    // imshow("r1",r1);
+    // imshow("r2",r2);
+    // waitKey(0);
 
     // brisk_d.push_back(tp);
     
@@ -501,4 +519,41 @@ double get_octave_size(int octave){
         return 1.0/pow(2,octave/2); 
     else
         return 2.0/3.0/pow(2,(octave-1)/2);
+}
+
+void Ransac(vector<kp_pair>& kpp,const int& number, int times){
+    // vector<kp_pair> temp_kpp = kpp;
+    srand ( unsigned ( std::time(0) ) );
+    double bias = 4.0;
+    int s = kpp.size();
+    double final_x = 0;
+    double final_y = 0;
+    int vote = 0;
+
+    for(int i = 0; i < times; i++){
+        double x_x = 0;
+        double y_y = 0;
+        int temp_vote = 0;
+        random_shuffle ( kpp.begin(), kpp.end(), myrandom);
+        for(int j = 0; j < number ; j++){
+            x_x += kpp[j].kp1.pt.x - kpp[j].kp2.pt.x;
+            y_y += kpp[j].kp1.pt.y - kpp[j].kp2.pt.y;
+        }
+        x_x /= number;
+        y_y /= number;
+        for(const auto& j:kpp){
+            double x = j.kp1.pt.x - j.kp2.pt.x;
+            double y = j.kp1.pt.y - j.kp2.pt.y;
+            if((x < x_x+bias) && (x > x_x-bias)){
+                if((y < y_y+bias) && (y > y_y-bias))
+                    temp_vote++;
+            }
+        }
+        if(temp_vote > vote){
+            vote = temp_vote;
+            final_x = x_x;
+            final_y = y_y;
+        }
+    }
+    cout << vote << endl;
 }
