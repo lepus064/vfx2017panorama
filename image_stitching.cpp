@@ -45,7 +45,7 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
 vector<KeyPoint> get_fast_keypoint(const Mat& src);
 vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src);
 double get_octave_size(int octave);
-void Ransac(vector<kp_pair>& kpp, const int& number, int time);
+void Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double &dy);
 int myrandom (int i) { return std::rand()%i;}
 
 int main(int argc, char**argv){
@@ -97,6 +97,9 @@ int main(int argc, char**argv){
     RNG color_bgr;
     vector<kp_pair> true_kp;
 
+    cylindrical(r1,all_kps[0],704.916);
+    cylindrical(r2,all_kps[1],706.286);
+    
     for(int i = 0; i < brisk_d[0].size();i++){
         int a = key_pair(brisk_d[0][i],brisk_d[1],120);
         if(a != -1){
@@ -114,18 +117,31 @@ int main(int argc, char**argv){
             // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
         }
     }
-    Ransac(true_kp,5,1000);
-    for(const auto &i:true_kp){
-        int B = color_bgr.uniform(0,255);
-        int G = color_bgr.uniform(0,255);
-        int R = color_bgr.uniform(0,255);
-        circle(r1,i.kp1.pt,3,Scalar(B,G,R));
-        circle(r2,i.kp2.pt,3,Scalar(B,G,R));
+    double dx,dy;
+    Ransac(true_kp,5,1000,dx,dy);
+    Mat r3;
+    if(dx > 0){
+        
+        dx = (-r1.cols + r2.cols)/2.0 + dx; 
+        r3 = cylindrical_merge(r1,r2,dx,dy,0);
     }
+    else{
+        dx = (-r1.cols + r2.cols)/2.0 - dx; 
+        r3 = cylindrical_merge(r2,r1,dx,-dy,0);
+    }
+
+    // for(const auto &i:true_kp){
+    //     int B = color_bgr.uniform(0,255);
+    //     int G = color_bgr.uniform(0,255);
+    //     int R = color_bgr.uniform(0,255);
+    //     circle(r1,i.kp1.pt,3,Scalar(B,G,R));
+    //     circle(r2,i.kp2.pt,3,Scalar(B,G,R));
+    // }
 
 
     imshow("r1",r1);
     imshow("r2",r2);
+    imshow("r3",r3);
     waitKey(0);
 
     // brisk_d.push_back(tp);
@@ -529,7 +545,7 @@ double get_octave_size(int octave){
         return 2.0/3.0/pow(2,(octave-1)/2);
 }
 
-void Ransac(vector<kp_pair>& kpp,const int& number, int times){
+void Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
     vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
     double bias = 4.0;
@@ -580,5 +596,8 @@ void Ransac(vector<kp_pair>& kpp,const int& number, int times){
     result_x /= result_kpp.size();
     result_y /= result_kpp.size();
     kpp = result_kpp;
+
+    dx = result_x;
+    dy = result_y;
     // cout << vote << endl;
 }
