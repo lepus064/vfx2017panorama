@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <vector>
 #include <deque>
+#include <map>
 #include <thread>
 #include <cstdlib>
 
@@ -35,7 +36,7 @@ struct kp_pair{
 
 void loadExposureSeq(string, vector<Mat>&, vector<double>&);
 double weight(int z);
-int get_img_in_dir(string dir, vector<Mat> &images);
+int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf);
 void create_octaves(const Mat &src,vector<Mat>& c_octaves, vector<Mat>& d_octaves);
 void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2);
 int fast_score(const Mat &src, const vector<Point> &pts);
@@ -47,11 +48,12 @@ vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src);
 double get_octave_size(int octave);
 void Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double &dy);
 int myrandom (int i) { return std::rand()%i;}
+map<string,double> get_f(string s);
 
 int main(int argc, char**argv){
     
-    if(argc != 2){
-        cout << "Usage: ./hdr_imaging ./Path_to_data" << endl;
+    if(argc != 3){
+        cout << "Usage: ./hdr_imaging ./Path_to_data ./Path_to_pano.txt" << endl;
         return 0;
     }
     
@@ -64,10 +66,16 @@ int main(int argc, char**argv){
     vector<vector<KeyPoint> > all_kps;
     vector<vector<double> > response_octave;
     vector<vector<Mat> > brisk_d; //[img][brisk_descriptor for keypoint]
+    vector<double> factor_f; // TODO
 
-    get_img_in_dir(argv[1], images);
+
+    get_img_in_dir(argv[1], images, get_f(argv[2]));
     brisk_d.resize(images.size());
     // create_octaves(images[0]);
+
+    string pause_t;
+    cout << "Pause" << endl;
+    cin >> pause_t;
 
     vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
@@ -130,15 +138,6 @@ int main(int argc, char**argv){
         r3 = cylindrical_merge(r2,r1,dx,-dy,0);
     }
 
-    // for(const auto &i:true_kp){
-    //     int B = color_bgr.uniform(0,255);
-    //     int G = color_bgr.uniform(0,255);
-    //     int R = color_bgr.uniform(0,255);
-    //     circle(r1,i.kp1.pt,3,Scalar(B,G,R));
-    //     circle(r2,i.kp2.pt,3,Scalar(B,G,R));
-    // }
-
-
     imshow("r1",r1);
     imshow("r2",r2);
     imshow("r3",r3);
@@ -182,7 +181,7 @@ double weight(int z){
     return z > 127 ? ((256-z)*1.0/128) : ((z+1)*1.0/128);
 }
 
-int get_img_in_dir(string dir, vector<Mat> &images){
+int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf){
     DIR *dp;
     struct dirent *dirp;
     if((dp = opendir(dir.c_str())) == NULL){
@@ -600,4 +599,14 @@ void Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, doubl
     dx = result_x;
     dy = result_y;
     // cout << vote << endl;
+}
+
+map<string,double> get_f(string s){
+    map<string,double> map_f;
+    fstream fs(s);
+    string temp;
+    while(fs >> temp){
+        cout << temp << endl;
+    }
+    return map_f;
 }
