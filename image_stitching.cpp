@@ -52,7 +52,7 @@ map<string,double> get_f(string s);
 void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy);
 
 int main(int argc, char**argv){
-    
+    cout << max(1.5,max(2.5,3.5)) << endl;
     if(argc != 3){
         cout << "Usage: ./hdr_imaging ./Path_to_data ./Path_to_pano.txt" << endl;
         return 0;
@@ -97,7 +97,8 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    for(int j = 0;j<images.size();j++){
+    int img_ = 4;
+    for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
         cout << "calculating image" << j << " feature descriptors." << endl;
         for(auto i : all_kps[j]){
@@ -110,7 +111,7 @@ int main(int argc, char**argv){
     bool left2right = true;
 
     Mat r3;
-    for(int m = 0; m < images.size()-1 ; m++){
+    for(int m = 0; m < img_-1 ; m++){
         cout << "Start to merge image " << m << " and " << m+1 << "." << endl;
         Mat r1,r2;
         r1 = images[m].clone();

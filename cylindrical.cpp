@@ -31,7 +31,7 @@ void cylindrical(Mat& src, vector<cv::KeyPoint> &kps, double f){
 
 Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y, double angle = 0){
     int cols = ceil(left.cols/2.0 + right.cols/2.0 + x2x);
-    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))))+5;
+    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))))+10;
     // if(left.rows/2.0 + right.rows/2.0 + abs(y2y) > max(left.rows,right.rows))
     //     rows = left.rows/2.0 + right.rows/2.0 + abs(y2y);
     // double overlap_x = (left.cols+right.cols)/2.0 - x2x;
@@ -62,7 +62,7 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
     }
     else{
         left(Rect(0,0,left.cols - overlap_x,left.rows)).copyTo(res(Rect(0,0,left.cols - overlap_x, left.rows)));
-        right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,y2y,right.cols - overlap_x,right.rows)));
+        right(Rect(overlap_x,0,right.cols - overlap_x,right.rows-1)).copyTo(res(Rect(left.cols,y2y,right.cols - overlap_x,right.rows-1)));
         int count = overlap_x;
         int edge = 5;
         double alpha,beta;
@@ -80,5 +80,6 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
             count--;
         }
     }
+    res = res(Rect(0,0,res.cols,res.rows-10));
     return res;
 }
