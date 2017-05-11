@@ -36,7 +36,7 @@ struct kp_pair{
 
 void loadExposureSeq(string, vector<Mat>&, vector<double>&);
 double weight(int z);
-int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf);
+int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf,vector<double>& f_f);
 void create_octaves(const Mat &src,vector<Mat>& c_octaves, vector<Mat>& d_octaves);
 void fast_detect(const Mat& src, vector<KeyPoint> &kps, int v1, int v2);
 int fast_score(const Mat &src, const vector<Point> &pts);
@@ -69,24 +69,30 @@ int main(int argc, char**argv){
     vector<double> factor_f; // TODO
 
 
-    get_img_in_dir(argv[1], images, get_f(argv[2]));
+    get_img_in_dir(argv[1], images, get_f(argv[2]), factor_f);
+    if(images.size() != factor_f.size()){
+        cout << "pano.txt is not correct." << endl;
+        return 0;
+    }
+
     brisk_d.resize(images.size());
-    // create_octaves(images[0]);
+    
+    // string pause_t;
+    // cout << "Pause" << endl;
+    // cin >> pause_t;
 
-    string pause_t;
-    cout << "Pause" << endl;
-    cin >> pause_t;
-
-    vector<vector<vector<KeyPoint> > > kpss(images.size());
+    // vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
 
-    // for(const auto& i:images){
-    //     all_kps.push_back(get_fast_keypoint(i));
-    // }
+    for(const auto& i:images){
+        all_kps.push_back(get_fast_keypoint(i));
+    }
 
-    all_kps.push_back(get_fast_keypoint(images[0]));
-    all_kps.push_back(get_fast_keypoint(images[1]));
+    // all_kps.push_back(get_fast_keypoint(images[0]));
+    // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
+
+    
     vector<Mat> tp;
     for(int j = 0;j<2;j++){
         cout << "calculating image " << j << endl;
@@ -153,18 +159,6 @@ int main(int argc, char**argv){
     //     FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
     // }
 
-    // fast_detect(images[0],kps[0][0],5,8);
-
-    
-
-    // brisk_short(images[0],kps[0][0],100);
-    // brisk_compare();
-    // for(auto i:kps){
-    //     if(i.response > 2000)
-    //         cout << i.pt.x << "," << i.pt.y << " " << i.response << endl;
-    // }
-
-
     /* cylindrical */
     
     // cylindrical(temp, kps,704.916);
@@ -181,7 +175,7 @@ double weight(int z){
     return z > 127 ? ((256-z)*1.0/128) : ((z+1)*1.0/128);
 }
 
-int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf){
+int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf, vector<double>& f_f){
     DIR *dp;
     struct dirent *dirp;
     if((dp = opendir(dir.c_str())) == NULL){
@@ -199,6 +193,7 @@ int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf){
     for(auto i:names){
         Mat img = imread(dir + "/" + i);
         images.push_back(img);
+        f_f.push_back(mf[i]);
     }
     closedir(dp);
     return 0;
@@ -605,8 +600,23 @@ map<string,double> get_f(string s){
     map<string,double> map_f;
     fstream fs(s);
     string temp;
+    string file_name = "\\";
     while(fs >> temp){
-        cout << temp << endl;
+        string name = "";
+        double f = 0.0;
+        auto it = find_end(temp.cbegin(),temp.cend(),file_name.cbegin(),file_name.cend());
+        it++;
+        while(it != temp.cend()){
+            name += *it;
+            it++;
+        }
+        for(int i = 0; i < 20;i++)
+            fs >> temp;
+        fs >> f;
+        // cout << name << " , " << f << endl;
+        map_f[name] = f;
+        // break;
     }
+    
     return map_f;
 }
