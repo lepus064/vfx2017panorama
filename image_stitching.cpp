@@ -58,13 +58,14 @@ int main(int argc, char**argv){
     }
     
 
-    // Some parameters
+    // All parameters
     vector<Mat> images; // Example 1024*768
     vector<double> times;
-    vector<string> names;
-    vector<Point> pts;
+    // vector<string> names;
+    // vector<Point> pts;
+
+    // All variables
     vector<vector<KeyPoint> > all_kps;
-    vector<vector<double> > response_octave;
     vector<vector<Mat> > brisk_d; //[img][brisk_descriptor for keypoint]
     vector<double> factor_f; // TODO
 
@@ -104,6 +105,8 @@ int main(int argc, char**argv){
 
     int max_hamming_distance = 120;
     int ransac_times = 500;
+    bool left2right = true;
+
 
     for(int m = 0; m < 1 ; m++){
         cout << "Start to merge image " << m << " and " << m+1 << "." << endl;
@@ -146,6 +149,7 @@ int main(int argc, char**argv){
             r3 = cylindrical_merge(r2,r1,dx,-dy,0);
         }
 
+        panorama = r3;
         imshow("r1",r1);
         imshow("r2",r2);
         imshow("r3",r3);
