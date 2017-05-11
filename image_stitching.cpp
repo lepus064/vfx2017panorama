@@ -52,7 +52,7 @@ map<string,double> get_f(string s);
 void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy);
 
 int main(int argc, char**argv){
-    cout << max(1.5,max(2.5,3.5)) << endl;
+
     if(argc != 3){
         cout << "Usage: ./hdr_imaging ./Path_to_data ./Path_to_pano.txt" << endl;
         return 0;
@@ -81,14 +81,7 @@ int main(int argc, char**argv){
 
     brisk_d.resize(images.size());
     
-    // string pause_t;
-    // cout << "Pause" << endl;
-    // cin >> pause_t;
-
-    // vector<vector<vector<KeyPoint> > > kpss(images.size());
-    // Mat temp_mat = .clone();
-
-    cout << "Detecting all feature points." << endl;
+    cout << "Detecting all feature points." << endl << endl;
     for(const auto& i:images){
         all_kps.push_back(get_fast_keypoint(i));
     }
@@ -97,19 +90,20 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    int img_ = 4;
+    int img_ = 4;//images.size();
     for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
-        cout << "calculating image" << j << " feature descriptors." << endl;
+        cout << "Calculating image" << j << " feature descriptors." << endl;
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
     }
 
     int max_hamming_distance = 120;
-    int ransac_times = 500;
+    int ransac_times = 800;
     bool left2right = true;
 
+    cout << endl;
     Mat r3;
     for(int m = 0; m < img_-1 ; m++){
         cout << "Start to merge image " << m << " and " << m+1 << "." << endl;
@@ -139,9 +133,7 @@ int main(int argc, char**argv){
                 temp_kpp.kp1_ID = i;
                 temp_kpp.kp2_ID = a;
                 true_kp.push_back(temp_kpp);
-                // circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
-                // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
-                // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
+
             }
         }
 
@@ -172,23 +164,6 @@ int main(int argc, char**argv){
     // waitKey(0);
     panorama(cy_Mat,dx_dy_);
     
-    // brisk_compare();
-
-    //kps[images][octaves][keypoints]
-    // kps[0].resize(9);
-    // for(int i=0;i<images.size();i++){
-    //     FAST(images[i],kps[i],40,true,FastFeatureDetector::TYPE_9_16);
-    // }
-
-    /* cylindrical */
-    
-    // cylindrical(temp, kps,704.916);
-    // cylindrical(temp2,kps,706.286);
-    // imshow("right",temp);
-    // imshow("left",temp2);
-    // imshow("cylindrical", cylindrical_merge(temp2,temp,244,5,0));
-    // waitKey(0);
-
     return 0;
 }
 
@@ -647,20 +622,23 @@ void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxd
     double y_bias = 0;
     Mat result_mat = cy_Mat[0].clone();
 
+    // for(const auto &i:dxdy)
+    //     y_bias += i.second;
+    // y_bias /= dxdy.size();
+    // cout << y_bias << endl;
     // for(int i = 0; i < dxdy.size();i++){
     for(int i = 0; i < dxdy.size();i++){
         double temp_dx = 0;
         if(dxdy[i].first > 0){
             temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 + dxdy[i].first; 
-            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,dxdy[i].second,0);
+            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,dxdy[i].second - y_bias,0);
         }
         else{
             temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first; 
-            result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,-dxdy[i].second,0);
+            result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,-(dxdy[i].second - y_bias),0);
         }
-        // break;
-        // cout << i.first << " " << i.second << endl;
     }
     imshow("panorama",result_mat);
     waitKey(0);
+    imwrite("../panorama.jpg",result_mat);
 }
