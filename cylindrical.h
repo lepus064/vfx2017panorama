@@ -10,8 +10,8 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <algorithm>
 #include <cmath>
-
 
 void cylindrical(cv::Mat& src, std::vector<cv::KeyPoint> &kps, double f);
 

@@ -49,6 +49,7 @@ double get_octave_size(int octave);
 int Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double &dy);
 int myrandom (int i) { return std::rand()%i;}
 map<string,double> get_f(string s);
+void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy);
 
 int main(int argc, char**argv){
     
@@ -68,6 +69,8 @@ int main(int argc, char**argv){
     vector<vector<KeyPoint> > all_kps;
     vector<vector<Mat> > brisk_d; //[img][brisk_descriptor for keypoint]
     vector<double> factor_f; // TODO
+    vector<Mat> cy_Mat; // cylindrical images
+    vector<pair<double,double> > dx_dy_;
 
 
     get_img_in_dir(argv[1], images, get_f(argv[2]), factor_f);
@@ -85,6 +88,7 @@ int main(int argc, char**argv){
     // vector<vector<vector<KeyPoint> > > kpss(images.size());
     // Mat temp_mat = .clone();
 
+    cout << "Detecting all feature points." << endl;
     for(const auto& i:images){
         all_kps.push_back(get_fast_keypoint(i));
     }
@@ -93,22 +97,20 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    // for(int j = 0;j<images.size();j++){
-    for(int j = 0;j<3;j++){
-        cout << "calculating image " << j << endl;
+    for(int j = 0;j<images.size();j++){
+    // for(int j = 0;j<4;j++){
+        cout << "calculating image" << j << " feature descriptors." << endl;
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
     }
 
-    Mat panorama;
-
     int max_hamming_distance = 120;
     int ransac_times = 500;
     bool left2right = true;
 
-
-    for(int m = 0; m < 1 ; m++){
+    Mat r3;
+    for(int m = 0; m < images.size()-1 ; m++){
         cout << "Start to merge image " << m << " and " << m+1 << "." << endl;
         Mat r1,r2;
         r1 = images[m].clone();
@@ -119,6 +121,10 @@ int main(int argc, char**argv){
 
         cylindrical(r1,all_kps[m],factor_f[m]);
         cylindrical(r2,all_kps[m+1],factor_f[m+1]);
+
+        if(m == 0)
+            cy_Mat.push_back(r1);
+        cy_Mat.push_back(r2);
         
         for(int i = 0; i < brisk_d[m].size();i++){
             int a = key_pair(brisk_d[m][i],brisk_d[m+1],max_hamming_distance);
@@ -137,26 +143,33 @@ int main(int argc, char**argv){
                 // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
             }
         }
+
         double dx,dy;
         Ransac(true_kp,4,ransac_times,dx,dy);
-        Mat r3;
-        if(dx > 0){
-            dx = (-r1.cols + r2.cols)/2.0 + dx; 
-            r3 = cylindrical_merge(r1,r2,dx,dy,0);
-        }
-        else{
-            dx = (-r1.cols + r2.cols)/2.0 - dx; 
-            r3 = cylindrical_merge(r2,r1,dx,-dy,0);
-        }
+        dx_dy_.push_back(pair<double,double>(dx,dy));
+        // Mat r3;
+        // if(dx > 0){
+        //     dx = (-r1.cols + r2.cols)/2.0 + dx; 
+        //     r3 = cylindrical_merge(r1,r2,dx,dy,0);
+        // }
+        // else{
+        //     dx = (-r1.cols + r2.cols)/2.0 - dx; 
+        //     r3 = cylindrical_merge(r2,r1,dx,-dy,0);
+        // }
 
-        panorama = r3;
-        imshow("r1",r1);
-        imshow("r2",r2);
-        imshow("r3",r3);
-        waitKey(0);
+        // imshow("r1",r1);
+        // imshow("r2",r2);
+        // imshow("r3",r3);
+        // waitKey(0);
     }
 
-    
+    // r3 = cylindrical_merge(cy_Mat[1],cy_Mat[0],-dx_dy_[0].first,-dx_dy_[0].second,0);
+    // imshow("r3",r3);
+    // waitKey(0);
+    // r3 = cylindrical_merge(cy_Mat[2],r3,400,-dx_dy_[1].second,0);
+    // imshow("r3",r3);
+    // waitKey(0);
+    panorama(cy_Mat,dx_dy_);
     
     // brisk_compare();
 
@@ -549,7 +562,7 @@ double get_octave_size(int octave){
 int Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
     vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
-    double bias = 4.0;
+    double bias = 3.0;
     int s = kpp.size();
     double final_x = 0;
     double final_y = 0;
@@ -626,4 +639,27 @@ map<string,double> get_f(string s){
     }
     
     return map_f;
+}
+
+void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy){
+    cout << "Generating panorama !!" << endl;
+    double y_bias = 0;
+    Mat result_mat = cy_Mat[0].clone();
+
+    // for(int i = 0; i < dxdy.size();i++){
+    for(int i = 0; i < dxdy.size();i++){
+        double temp_dx = 0;
+        if(dxdy[i].first > 0){
+            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 + dxdy[i].first; 
+            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,dxdy[i].second,0);
+        }
+        else{
+            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first; 
+            result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,-dxdy[i].second,0);
+        }
+        // break;
+        // cout << i.first << " " << i.second << endl;
+    }
+    imshow("panorama",result_mat);
+    waitKey(0);
 }
