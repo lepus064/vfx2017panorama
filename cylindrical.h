@@ -9,11 +9,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 #include <cmath>
 
 
 void cylindrical(cv::Mat& src, std::vector<cv::KeyPoint> &kps, double f);
 
 cv::Mat cylindrical_merge(const cv::Mat& left, const cv::Mat& right, double x2x, double y2y, double angle);
+std::pair<double,double> get_true_x_y(const cv::Mat& left, const cv::Mat& right, double x2x, double y2y);
 
 #endif

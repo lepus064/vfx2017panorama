@@ -46,7 +46,7 @@ vector<KeyPoint> reduce_pt_from_octaves(const Mat& src,deque<vector<KeyPoint> > 
 vector<KeyPoint> get_fast_keypoint(const Mat& src);
 vector<double> get_subpixel_and_octave(vector<KeyPoint>& kps, const Mat& src);
 double get_octave_size(int octave);
-void Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double &dy);
+int Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double &dy);
 int myrandom (int i) { return std::rand()%i;}
 map<string,double> get_f(string s);
 
@@ -92,64 +92,67 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    
-    vector<Mat> tp;
-    for(int j = 0;j<2;j++){
+    // for(int j = 0;j<images.size();j++){
+    for(int j = 0;j<3;j++){
         cout << "calculating image " << j << endl;
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
         }
     }
-    int min_dist = 512;
-    int max_dist = 0;
-    Mat r1,r2;
-    r1 = images[0].clone();
-    r2 = images[1].clone();
-    // drawKeypoints(r2,all_kps[1],r2);
-    // imshow("r2",r2);
-    // waitKey(0);
-    RNG color_bgr;
-    vector<kp_pair> true_kp;
 
-    cylindrical(r1,all_kps[0],704.916);
-    cylindrical(r2,all_kps[1],706.286);
-    
-    for(int i = 0; i < brisk_d[0].size();i++){
-        int a = key_pair(brisk_d[0][i],brisk_d[1],120);
-        if(a != -1){
-            int B = color_bgr.uniform(0,255);
-            int G = color_bgr.uniform(0,255);
-            int R = color_bgr.uniform(0,255);
-            kp_pair temp_kpp;
-            temp_kpp.kp1 = all_kps[0][i];
-            temp_kpp.kp2 = all_kps[1][a];
-            temp_kpp.kp1_ID = i;
-            temp_kpp.kp2_ID = a;
-            true_kp.push_back(temp_kpp);
-            // circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
-            // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
-            // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
-        }
-    }
-    double dx,dy;
-    Ransac(true_kp,5,1000,dx,dy);
-    Mat r3;
-    if(dx > 0){
+    Mat panorama;
+
+    int max_hamming_distance = 120;
+    int ransac_times = 500;
+
+    for(int m = 0; m < 1 ; m++){
+        cout << "Start to merge image " << m << " and " << m+1 << "." << endl;
+        Mat r1,r2;
+        r1 = images[m].clone();
+        r2 = images[m+1].clone();
+
+        RNG color_bgr;
+        vector<kp_pair> true_kp;
+
+        cylindrical(r1,all_kps[m],factor_f[m]);
+        cylindrical(r2,all_kps[m+1],factor_f[m+1]);
         
-        dx = (-r1.cols + r2.cols)/2.0 + dx; 
-        r3 = cylindrical_merge(r1,r2,dx,dy,0);
-    }
-    else{
-        dx = (-r1.cols + r2.cols)/2.0 - dx; 
-        r3 = cylindrical_merge(r2,r1,dx,-dy,0);
+        for(int i = 0; i < brisk_d[m].size();i++){
+            int a = key_pair(brisk_d[m][i],brisk_d[m+1],max_hamming_distance);
+            if(a != -1){
+                int B = color_bgr.uniform(0,255);
+                int G = color_bgr.uniform(0,255);
+                int R = color_bgr.uniform(0,255);
+                kp_pair temp_kpp;
+                temp_kpp.kp1 = all_kps[m][i];
+                temp_kpp.kp2 = all_kps[m+1][a];
+                temp_kpp.kp1_ID = i;
+                temp_kpp.kp2_ID = a;
+                true_kp.push_back(temp_kpp);
+                // circle(r1,all_kps[0][i].pt,3,Scalar(B,G,R));
+                // cout << all_kps[1][a].pt.x << "," << all_kps[1][a].pt.y << endl;
+                // circle(r2,all_kps[1][a].pt,3,Scalar(B,G,R));
+            }
+        }
+        double dx,dy;
+        Ransac(true_kp,4,ransac_times,dx,dy);
+        Mat r3;
+        if(dx > 0){
+            dx = (-r1.cols + r2.cols)/2.0 + dx; 
+            r3 = cylindrical_merge(r1,r2,dx,dy,0);
+        }
+        else{
+            dx = (-r1.cols + r2.cols)/2.0 - dx; 
+            r3 = cylindrical_merge(r2,r1,dx,-dy,0);
+        }
+
+        imshow("r1",r1);
+        imshow("r2",r2);
+        imshow("r3",r3);
+        waitKey(0);
     }
 
-    imshow("r1",r1);
-    imshow("r2",r2);
-    imshow("r3",r3);
-    waitKey(0);
-
-    // brisk_d.push_back(tp);
+    
     
     // brisk_compare();
 
@@ -539,7 +542,7 @@ double get_octave_size(int octave){
         return 2.0/3.0/pow(2,(octave-1)/2);
 }
 
-void Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
+int Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
     vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
     double bias = 4.0;
@@ -593,7 +596,7 @@ void Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, doubl
 
     dx = result_x;
     dy = result_y;
-    // cout << vote << endl;
+    return vote;
 }
 
 map<string,double> get_f(string s){

@@ -32,7 +32,6 @@ void cylindrical(Mat& src, vector<cv::KeyPoint> &kps, double f){
 Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y, double angle = 0){
     int cols = left.cols/2.0 + right.cols/2.0 + x2x;
     double rows = left.rows/2.0 + right.rows/2.0 + abs(y2y);
-    cout << rows << endl;
     double overlap_x = (left.cols+right.cols)/2.0 - x2x;
     
     Mat res(rows,cols,CV_8UC3,Scalar(0,0,0));
