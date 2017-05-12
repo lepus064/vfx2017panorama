@@ -11,4 +11,4 @@ cylindrical.h
 cylindrical.cpp
 )
 
-target_link_libraries( image_stitching ${OpenCV_LIBS} )
+target_link_libraries( image_stitching ${OpenCV_LIBS} -lpthread)

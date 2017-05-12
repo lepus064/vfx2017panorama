@@ -22,6 +22,7 @@
 #include <deque>
 #include <map>
 #include <thread>
+#include <future>
 #include <cstdlib>
 
 using namespace cv;
@@ -50,6 +51,7 @@ int Ransac(vector<kp_pair>& kpp, const int& number, int time, double &dx, double
 int myrandom (int i) { return std::rand()%i;}
 map<string,double> get_f(string s);
 void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy);
+void get_all_kps(vector<vector<KeyPoint> > &all_kps, const vector<Mat> &images);
 
 int main(int argc, char**argv){
 
@@ -72,6 +74,8 @@ int main(int argc, char**argv){
     vector<Mat> cy_Mat; // cylindrical images
     vector<pair<double,double> > dx_dy_;
 
+    int thread_num = 4;
+
 
     get_img_in_dir(argv[1], images, get_f(argv[2]), factor_f);
     if(images.size() != factor_f.size()){
@@ -82,17 +86,26 @@ int main(int argc, char**argv){
     brisk_d.resize(images.size());
     
     cout << endl << "Detecting all feature points." << endl << endl;
-    for(const auto& i:images){
-        all_kps.push_back(get_fast_keypoint(i));
-    }
+    
 
+
+    // get_all_kps(all_kps,images);
+    // cout << all_kps.size() << endl;
+    // for(const auto& i:images){
+    //     all_kps.push_back(get_fast_keypoint(i));
+    // }
+    
+
+    // return 0;
     // all_kps.push_back(get_fast_keypoint(images[0]));
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    int img_ = images.size();
+    int img_ = 4; //images.size();
+
     for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
+        all_kps.push_back(get_fast_keypoint(images[j]));
         cout << "Calculating image" << j << " feature descriptors." << endl;
         for(auto i : all_kps[j]){
             brisk_d[j].push_back(brisk_short(images[j],i,get_octave_size(i.octave)));
@@ -134,21 +147,14 @@ int main(int argc, char**argv){
                 temp_kpp.kp2_ID = a;
                 true_kp.push_back(temp_kpp);
 
+                // circle(r1,temp_kpp.kp1.pt,3,Scalar(B,G,R));
+                // circle(r2,temp_kpp.kp2.pt,3,Scalar(B,G,R));
             }
         }
 
         double dx,dy;
         Ransac(true_kp,4,ransac_times,dx,dy);
         dx_dy_.push_back(pair<double,double>(dx,dy));
-        // Mat r3;
-        // if(dx > 0){
-        //     dx = (-r1.cols + r2.cols)/2.0 + dx; 
-        //     r3 = cylindrical_merge(r1,r2,dx,dy,0);
-        // }
-        // else{
-        //     dx = (-r1.cols + r2.cols)/2.0 - dx; 
-        //     r3 = cylindrical_merge(r2,r1,dx,-dy,0);
-        // }
 
         // imshow("r1",r1);
         // imshow("r2",r2);
@@ -539,7 +545,7 @@ double get_octave_size(int octave){
 int Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
     vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
-    double bias = 3.0;
+    double bias = 2.0;
     int s = kpp.size();
     double final_x = 0;
     double final_y = 0;
@@ -616,6 +622,28 @@ map<string,double> get_f(string s){
     }
     
     return map_f;
+}
+
+void get_all_kps(vector<vector<KeyPoint> > &all_kps, const vector<Mat> &images){
+
+    int times = images.size()/2;
+    int remain = images.size()%2;
+
+    for(int i = 0; i < times;i++){
+        auto f1 = async(launch::async,get_fast_keypoint, images[i*4]);
+        auto f2 = async(launch::async,get_fast_keypoint, images[i*4+1]);
+        // auto f3 = async(launch::async,get_fast_keypoint, images[i*4+2]);
+        // auto f4 = async(launch::async,get_fast_keypoint, images[i*4+3]);
+        all_kps.push_back(f1.get());
+        all_kps.push_back(f2.get());
+        // all_kps.push_back(f3.get());
+        // all_kps.push_back(f4.get());
+    }
+
+    for(int i = images.size()-remain ; i< images.size();i++){
+        all_kps.push_back(get_fast_keypoint(images[i]));
+    }
+
 }
 
 void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy){
