@@ -97,7 +97,7 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
             left(Rect(0,0,left.cols - overlap_x,left.rows)).copyTo(res(Rect(0,right.rows/2.0-left.rows/2.0-y2y,left.cols - overlap_x, left.rows)));
             right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,0,right.cols - overlap_x,right.rows)));
             int count = overlap_x;
-            int edge = 5;
+            int edge = 10;
             double alpha,beta;
             
             // TODO maybe done???

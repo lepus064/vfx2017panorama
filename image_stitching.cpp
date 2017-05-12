@@ -74,7 +74,7 @@ int main(int argc, char**argv){
     vector<Mat> cy_Mat; // cylindrical images
     vector<pair<double,double> > dx_dy_;
 
-    int thread_num = 4;
+    int thread_num = 5;
 
 
     get_img_in_dir(argv[1], images, get_f(argv[2]), factor_f);
@@ -100,8 +100,7 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[0]));
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
-
-    int img_ = 4; //images.size();
+    int img_ = images.size(); // 14 is fine
 
     for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
@@ -112,8 +111,8 @@ int main(int argc, char**argv){
         }
     }
 
-    int max_hamming_distance = 125;
-    int ransac_times = 800;
+    int max_hamming_distance = 120;
+    int ransac_times = 1000;
     bool left2right = true;
 
     cout << endl;
@@ -545,7 +544,7 @@ double get_octave_size(int octave){
 int Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double &dy){
     vector<kp_pair> result_kpp;
     srand ( unsigned ( std::time(0) ) );
-    double bias = 2.0;
+    double bias = 3.0;
     int s = kpp.size();
     double final_x = 0;
     double final_y = 0;
@@ -562,6 +561,8 @@ int Ransac(vector<kp_pair>& kpp,const int& number, int times, double &dx, double
         }
         x_x /= number;
         y_y /= number;
+        if(abs(y_y/x_x) > 0.25)
+            continue;
         for(const auto& j:kpp){
             double x = j.kp1.pt.x - j.kp2.pt.x;
             double y = j.kp1.pt.y - j.kp2.pt.y;
@@ -629,20 +630,20 @@ void get_all_kps(vector<vector<KeyPoint> > &all_kps, const vector<Mat> &images){
     int times = images.size()/2;
     int remain = images.size()%2;
 
-    for(int i = 0; i < times;i++){
-        auto f1 = async(launch::async,get_fast_keypoint, images[i*4]);
-        auto f2 = async(launch::async,get_fast_keypoint, images[i*4+1]);
-        // auto f3 = async(launch::async,get_fast_keypoint, images[i*4+2]);
-        // auto f4 = async(launch::async,get_fast_keypoint, images[i*4+3]);
-        all_kps.push_back(f1.get());
-        all_kps.push_back(f2.get());
-        // all_kps.push_back(f3.get());
-        // all_kps.push_back(f4.get());
-    }
+    // for(int i = 0; i < times;i++){
+    //     auto f1 = async(launch::async,get_fast_keypoint, images[i*4]);
+    //     auto f2 = async(launch::async,get_fast_keypoint, images[i*4+1]);
+    //     // auto f3 = async(launch::async,get_fast_keypoint, images[i*4+2]);
+    //     // auto f4 = async(launch::async,get_fast_keypoint, images[i*4+3]);
+    //     all_kps.push_back(f1.get());
+    //     all_kps.push_back(f2.get());
+    //     // all_kps.push_back(f3.get());
+    //     // all_kps.push_back(f4.get());
+    // }
 
-    for(int i = images.size()-remain ; i< images.size();i++){
-        all_kps.push_back(get_fast_keypoint(images[i]));
-    }
+    // for(int i = images.size()-remain ; i< images.size();i++){
+    //     all_kps.push_back(get_fast_keypoint(images[i]));
+    // }
 
 }
 
