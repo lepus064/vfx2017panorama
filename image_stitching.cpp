@@ -81,7 +81,7 @@ int main(int argc, char**argv){
 
     brisk_d.resize(images.size());
     
-    cout << "Detecting all feature points." << endl << endl;
+    cout << endl << "Detecting all feature points." << endl << endl;
     for(const auto& i:images){
         all_kps.push_back(get_fast_keypoint(i));
     }
@@ -90,7 +90,7 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    int img_ = 4;//images.size();
+    int img_ = 3;
     for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
         cout << "Calculating image" << j << " feature descriptors." << endl;
@@ -162,6 +162,7 @@ int main(int argc, char**argv){
     // r3 = cylindrical_merge(cy_Mat[2],r3,400,-dx_dy_[1].second,0);
     // imshow("r3",r3);
     // waitKey(0);
+
     panorama(cy_Mat,dx_dy_);
     
     return 0;
@@ -627,15 +628,19 @@ void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxd
     // y_bias /= dxdy.size();
     // cout << y_bias << endl;
     // for(int i = 0; i < dxdy.size();i++){
+    
     for(int i = 0; i < dxdy.size();i++){
         double temp_dx = 0;
+        double temp_dy = 0;
         if(dxdy[i].first > 0){
-            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 + dxdy[i].first; 
-            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,dxdy[i].second - y_bias,0);
+            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 + dxdy[i].first;
+            // temp_dy += (dxdy[i].second - y_bias);
+            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,(dxdy[i].second - y_bias),0);
         }
         else{
-            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first; 
-            result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,-(dxdy[i].second - y_bias),0);
+            temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first;
+            temp_dy = result_mat.rows/2.0 - cy_Mat[i+1].rows/2.0 - (dxdy[i].second - y_bias);
+            result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,temp_dy,0);
         }
     }
     imshow("panorama",result_mat);
