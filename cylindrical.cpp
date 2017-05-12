@@ -31,7 +31,7 @@ void cylindrical(Mat& src, vector<cv::KeyPoint> &kps, double f){
 
 Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y, double angle = 0){
     int cols = ceil(left.cols/2.0 + right.cols/2.0 + x2x);
-    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))))+1;
+    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))));
     // if(left.rows/2.0 + right.rows/2.0 + abs(y2y) > max(left.rows,right.rows))
     //     rows = left.rows/2.0 + right.rows/2.0 + abs(y2y);
     // double overlap_x = (left.cols+right.cols)/2.0 - x2x;

@@ -90,7 +90,7 @@ int main(int argc, char**argv){
     // all_kps.push_back(get_fast_keypoint(images[1]));
     // get_subpixel_and_octave(all_kps[0],images[0]);
 
-    int img_ = 3;
+    int img_ = images.size();
     for(int j = 0;j < img_;j++){
     // for(int j = 0;j<4;j++){
         cout << "Calculating image" << j << " feature descriptors." << endl;
