@@ -189,7 +189,8 @@ int get_img_in_dir(string dir, vector<Mat> &images, map<string,double> mf, vecto
     while((dirp = readdir(dp)) != NULL){
         string jpg = string(dirp->d_name);
         if(jpg.find(".jpg") == jpg.size()-4||jpg.find(".JPG") == jpg.size()-4){
-            names.insert(jpg);
+            if(jpg[0] != '.')
+                names.insert(jpg);
         }
     }
     for(auto i:names){
