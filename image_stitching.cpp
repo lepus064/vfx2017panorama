@@ -99,7 +99,7 @@ int main(int argc, char**argv){
         }
     }
 
-    int max_hamming_distance = 120;
+    int max_hamming_distance = 125;
     int ransac_times = 800;
     bool left2right = true;
 
@@ -639,7 +639,8 @@ void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxd
         }
         else{
             temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first;
-            temp_dy = result_mat.rows/2.0 - cy_Mat[i+1].rows/2.0 - (dxdy[i].second - y_bias);
+            temp_dy = (result_mat.rows - cy_Mat[i+1].rows)/2.0 - (dxdy[i].second - y_bias);
+            // temp_dy = -(dxdy[i].second - y_bias);
             result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,temp_dy,0);
         }
     }

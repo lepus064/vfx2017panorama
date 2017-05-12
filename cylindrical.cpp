@@ -31,7 +31,7 @@ void cylindrical(Mat& src, vector<cv::KeyPoint> &kps, double f){
 
 Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y, double angle = 0){
     int cols = ceil(left.cols/2.0 + right.cols/2.0 + x2x);
-    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))))+5;
+    int rows = ceil(max(double(left.rows/2.0 + right.rows/2.0 + abs(y2y)), double(max(left.rows,right.rows))))+1;
     // if(left.rows/2.0 + right.rows/2.0 + abs(y2y) > max(left.rows,right.rows))
     //     rows = left.rows/2.0 + right.rows/2.0 + abs(y2y);
     // double overlap_x = (left.cols+right.cols)/2.0 - x2x;
@@ -73,7 +73,7 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
             left(Rect(0,0,left.cols - overlap_x,left.rows)).copyTo(res(Rect(0,0,left.cols - overlap_x, left.rows)));
             // if()
             // right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,y2y,right.cols - overlap_x,right.rows)));
-            right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,y2y,right.cols - overlap_x,right.rows)));
+            right(Rect(overlap_x,0,right.cols - overlap_x,right.rows)).copyTo(res(Rect(left.cols,rows-right.rows,right.cols - overlap_x,right.rows)));
             int count = overlap_x;
             
             double alpha,beta;
@@ -81,7 +81,7 @@ Mat cylindrical_merge(const Mat& left, const Mat& right, double x2x, double y2y,
                 Mat temp_l(rows,1,CV_8UC3,Scalar(0,0,0));
                 Mat temp_r(rows,1,CV_8UC3,Scalar(0,0,0));
                 left(Rect(i,0,1,left.rows)).copyTo(temp_l(Rect(0,0,1,left.rows)));
-                right(Rect(overlap_x - count,0,1,right.rows)).copyTo(temp_r(Rect(0,y2y,1,right.rows)));
+                right(Rect(overlap_x - count,0,1,right.rows)).copyTo(temp_r(Rect(0,rows-right.rows,1,right.rows)));
                 if(count > overlap_x - edge)
                     alpha = 1.0;
                 else if(count <= edge)
