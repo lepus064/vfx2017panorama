@@ -34,6 +34,8 @@ cd src && mkdir build && cd build
 
 cmake ..
 
+make
+
 ./image_stitching ../../test_data ../../test_data/pano.txt
 
 ```
