@@ -650,31 +650,33 @@ void get_all_kps(vector<vector<KeyPoint> > &all_kps, const vector<Mat> &images){
 
 void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxdy){
     cout << "Generating panorama !!" << endl;
-    double y_bias = 0;
     Mat result_mat = cy_Mat[0].clone();
 
-    // for(const auto &i:dxdy)
-    //     y_bias += i.second;
-    // y_bias /= dxdy.size();
-    // cout << y_bias << endl;
-    // for(int i = 0; i < dxdy.size();i++){
+    double y_bias = 0;
+    double x_bias = 0;
+    for(int i =0;i<dxdy.size();i++){
+        x_bias += abs(dxdy[i].first);
+        y_bias += dxdy[i].second;
+    }
     
+    y_bias /= x_bias;
+
     for(int i = 0; i < dxdy.size();i++){
         double temp_dx = 0;
         double temp_dy = 0;
         if(dxdy[i].first > 0){
             temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 + dxdy[i].first;
             // temp_dy += (dxdy[i].second - y_bias);
-            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,(dxdy[i].second - y_bias),0);
+            result_mat = cylindrical_merge(result_mat,cy_Mat[i+1],temp_dx,(dxdy[i].second - y_bias*dxdy[i].first),0);
         }
         else{
             temp_dx = (result_mat.cols - cy_Mat[i+1].cols)/2.0 - dxdy[i].first;
-            temp_dy = (result_mat.rows - cy_Mat[i+1].rows)/2.0 - (dxdy[i].second - y_bias);
+            temp_dy = (result_mat.rows - cy_Mat[i+1].rows)/2.0 - (dxdy[i].second - y_bias*(-dxdy[i].first));
             // temp_dy = -(dxdy[i].second - y_bias);
             result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,temp_dy,0);
         }
     }
+    imwrite("../panorama.jpg",result_mat);
     imshow("panorama",result_mat);
     waitKey(0);
-    imwrite("../panorama.jpg",result_mat);
 }

@@ -688,7 +688,8 @@ void panorama(const vector<Mat> &cy_Mat, const vector<pair<double,double> > &dxd
             result_mat = cylindrical_merge(cy_Mat[i+1],result_mat,temp_dx,temp_dy,0);
         }
     }
-    // imshow("panorama",result_mat);
-    // waitKey(0);
     imwrite("../panorama.jpg",result_mat);
+    imshow("panorama",result_mat);
+    waitKey(0);
+    
 }
