@@ -28,7 +28,7 @@ Ubuntu 16.04
 
 ### 使用方法:
 ```
-git clone https://github.com/lepus064/vfx2017spring.git
+git clone https://github.com/lepus064/vfx2017panorama.git
 
 cd src && mkdir build && cd build
 
