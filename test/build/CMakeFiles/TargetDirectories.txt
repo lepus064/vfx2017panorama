@@ -1,3 +1,0 @@
-/Users/Lepus/Documents/CE/VFX/image_stitching/test/build/CMakeFiles/rebuild_cache.dir
-/Users/Lepus/Documents/CE/VFX/image_stitching/test/build/CMakeFiles/edit_cache.dir
-/Users/Lepus/Documents/CE/VFX/image_stitching/test/build/CMakeFiles/test_cv.dir
